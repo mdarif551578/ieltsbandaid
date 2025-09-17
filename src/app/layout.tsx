@@ -11,9 +11,41 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-body' });
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-headline' });
 
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ielts-bandaid.web.app';
+const title = 'IELTS BandAid - AI IELTS Writing Assessor';
+const description = 'Boost Your IELTS Writing Band Score with AI Feedback. Get instant, expert-level analysis based on official criteria.';
+
 export const metadata: Metadata = {
-  title: 'IELTS BandAid - AI IELTS Writing Assessor',
-  description: 'Boost Your IELTS Writing Band Score with AI Feedback. Get instant, expert-level analysis based on official criteria.',
+  metadataBase: new URL(siteUrl),
+  title: title,
+  description: description,
+  openGraph: {
+    title: title,
+    description: description,
+    url: siteUrl,
+    siteName: 'IELTS BandAid',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'IELTS BandAid an AI powered writing assessor',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: title,
+    description: description,
+    images: ['/og-image.png'],
+  },
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon-16x16.png',
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export default function RootLayout({
