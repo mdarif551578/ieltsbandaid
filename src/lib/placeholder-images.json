@@ -8,6 +8,12 @@
       "imageHint": "student writing"
     },
     {
+      "id": "about-hero",
+      "description": "A diverse group of students collaborating around a table.",
+      "imageUrl": "https://picsum.photos/seed/about-hero/1920/1080",
+      "imageHint": "students collaborating"
+    },
+    {
       "id": "testimonial-1",
       "description": "Headshot of a smiling young woman of South Asian descent.",
       "imageUrl": "https://picsum.photos/seed/person1boost/100/100",
