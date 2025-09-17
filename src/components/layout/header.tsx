@@ -24,7 +24,7 @@ export default function Header() {
       <div className="container flex h-16 items-center">
         <Link href="/" className="mr-6 flex items-center space-x-2">
           <GraduationCap className="h-6 w-6 text-primary" />
-          <span className="font-bold text-lg hidden sm:inline-block">IeltsBandBoost</span>
+          <span className="font-bold font-headline text-lg hidden sm:inline-block">IELTS BandAid</span>
         </Link>
         <nav className="hidden items-center space-x-6 text-sm font-medium md:flex">
           {navLinks.map((link) => (
@@ -41,7 +41,7 @@ export default function Header() {
           ))}
         </nav>
         <div className="flex flex-1 items-center justify-end space-x-4">
-          <Button asChild className="hidden md:inline-flex" variant="default">
+          <Button asChild className="hidden md:inline-flex">
             <Link href="/assess">Start Assessment</Link>
           </Button>
           <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
@@ -54,7 +54,7 @@ export default function Header() {
             <SheetContent side="left">
               <Link href="/" className="mr-6 flex items-center space-x-2 mb-6">
                 <GraduationCap className="h-6 w-6 text-primary" />
-                <span className="font-bold">IeltsBandBoost</span>
+                <span className="font-bold font-headline">IELTS BandAid</span>
               </Link>
               <div className="flex flex-col space-y-4">
                 {navLinks.map((link) => (

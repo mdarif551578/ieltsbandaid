@@ -49,7 +49,7 @@ const steps = [
 const testimonials = [
   {
     name: 'Priya S.',
-    quote: "IeltsBandBoost was a game-changer! The detailed feedback helped me jump from a 6.5 to a 7.5 in just two weeks.",
+    quote: "IELTS BandAid was a game-changer! The detailed feedback helped me jump from a 6.5 to a 7.5 in just two weeks.",
     image: placeholderImages.find(p => p.id === "testimonial-1")
   },
   {
@@ -75,15 +75,15 @@ export default function Home() {
              data-ai-hint={heroImage.imageHint}
            />
         )}
-        <div className="absolute inset-0 bg-black/50 -z-10" />
+        <div className="absolute inset-0 bg-black/60 -z-10" />
         <div className="container mx-auto px-4 md:px-6 text-center text-primary-foreground">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-bold">
             Boost Your IELTS Writing Score with AI Feedback
           </h1>
           <p className="mt-4 max-w-3xl mx-auto text-lg md:text-xl text-primary-foreground/90">
             Upload your essay and get instant, expert-level analysis based on official criteria.
           </p>
-          <Button asChild size="lg" className="mt-8 bg-secondary hover:bg-secondary/90">
+          <Button asChild size="lg" className="mt-8">
             <Link href="/assess">Start Free Assessment</Link>
           </Button>
         </div>
@@ -91,8 +91,8 @@ export default function Home() {
 
       <section id="features" className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4 md:px-6">
-          <h2 className="text-3xl md:text-4xl font-bold text-center">
-            Why Choose IeltsBandBoost?
+          <h2 className="text-3xl md:text-4xl font-headline font-bold text-center">
+            Why Choose IELTS BandAid?
           </h2>
           <p className="mt-4 max-w-2xl mx-auto text-center text-muted-foreground">
             Our platform is designed to give you the edge you need to succeed.
@@ -115,7 +115,7 @@ export default function Home() {
 
       <section id="how-it-works" className="py-16 md:py-24 bg-muted/50">
         <div className="container mx-auto px-4 md:px-6">
-          <h2 className="text-3xl md:text-4xl font-bold text-center">
+          <h2 className="text-3xl md:text-4xl font-headline font-bold text-center">
             How It Works in 3 Simple Steps
           </h2>
           <div className="mt-12 max-w-4xl mx-auto grid md:grid-cols-3 gap-8 md:gap-4 relative">
@@ -135,7 +135,7 @@ export default function Home() {
 
       <section id="testimonials" className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4 md:px-6">
-          <h2 className="text-3xl md:text-4xl font-bold text-center">
+          <h2 className="text-3xl md:text-4xl font-headline font-bold text-center">
             Loved by Students Worldwide
           </h2>
           <div className="mt-12 max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
