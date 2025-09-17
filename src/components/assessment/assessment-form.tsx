@@ -201,8 +201,7 @@ export default function AssessmentForm() {
       } else if (data.questionInputType === 'image' && data.questionImages) {
         data.questionImages.forEach((uri, index) => {
           const blob = dataURItoBlob(uri);
-          // Use indexed field name as a workaround for some backends
-          formData.append(`question_images`, blob, `question_image_${index}.png`);
+          formData.append('question_images', blob, `question_image_${index}.png`);
         });
       }
 
@@ -211,8 +210,7 @@ export default function AssessmentForm() {
       } else if (data.answerInputType === 'image' && data.answerImages) {
         data.answerImages.forEach((uri, index) => {
           const blob = dataURItoBlob(uri);
-          // Use indexed field name as a workaround for some backends
-          formData.append(`answer_images`, blob, `answer_image_${index}.png`);
+          formData.append('answer_images', blob, `answer_image_${index}.png`);
         });
       }
 
