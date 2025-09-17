@@ -54,19 +54,41 @@ export default function AssessPage() {
                     <p className="text-sm text-muted-foreground mb-4">
                         Not sure what to upload? Download our sample files to see how it works.
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-2">
-                        <Button variant="link" asChild className="p-0 h-auto justify-start">
-                            <a href="/sample-question.jpg" download>
-                               <Download className="mr-2 h-4 w-4" />
-                               Sample Question.jpg
-                            </a>
-                        </Button>
-                        <Button variant="link" asChild className="p-0 h-auto justify-start">
-                             <a href="/sample-answer.jpg" download>
-                                <Download className="mr-2 h-4 w-4" />
-                                Sample Answer.jpg
-                             </a>
-                        </Button>
+                    <div className="space-y-3">
+                        <div>
+                            <p className="text-sm font-semibold mb-2">Sample Questions:</p>
+                            <div className="flex flex-col sm:flex-row gap-2">
+                                <Button variant="link" asChild className="p-0 h-auto justify-start">
+                                    <a href="/sample-question.jpg" download>
+                                       <Download className="mr-2 h-4 w-4" />
+                                       Sample Question 1.jpg
+                                    </a>
+                                </Button>
+                                <Button variant="link" asChild className="p-0 h-auto justify-start">
+                                     <a href="/sample-question-2.jpg" download>
+                                        <Download className="mr-2 h-4 w-4" />
+                                        Sample Question 2.jpg
+                                     </a>
+                                </Button>
+                            </div>
+                        </div>
+                         <div>
+                            <p className="text-sm font-semibold mb-2">Sample Answers:</p>
+                            <div className="flex flex-col sm:flex-row gap-2">
+                                <Button variant="link" asChild className="p-0 h-auto justify-start">
+                                    <a href="/sample-answer.jpg" download>
+                                       <Download className="mr-2 h-4 w-4" />
+                                       Sample Answer 1.jpg
+                                    </a>
+                                </Button>
+                                <Button variant="link" asChild className="p-0 h-auto justify-start">
+                                     <a href="/sample-answer-2.jpg" download>
+                                        <Download className="mr-2 h-4 w-4" />
+                                        Sample Answer 2.jpg
+                                     </a>
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                 </CardContent>
             </Card>
