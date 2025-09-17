@@ -17,7 +17,6 @@ import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
 import { useAssessment } from '@/context/assessment-context';
 import { useRouter } from 'next/navigation';
 import { useTransition, useState, useId } from 'react';
@@ -38,6 +37,8 @@ const formSchema = z.object({
   answerImages: z.array(z.string()).optional(),
   candidateName: z.string().min(1, 'Name is required.'),
   candidateEmail: z.string().email({ message: "Invalid email address." }),
+  questionInputType: z.enum(['text', 'image']),
+  answerInputType: z.enum(['text', 'image']),
 }).superRefine((data, ctx) => {
     if (data.questionInputType === 'text' && (!data.question || data.question.trim().length < 10)) {
         ctx.addIssue({
@@ -68,10 +69,7 @@ const formSchema = z.object({
     }
 });
 
-type FormValues = z.infer<typeof formSchema> & {
-    questionInputType: 'text' | 'image',
-    answerInputType: 'text' | 'image'
-};
+type FormValues = z.infer<typeof formSchema>;
 
 
 // Helper to convert data URI to Blob
@@ -123,37 +121,55 @@ export default function AssessmentForm() {
     const files = e.target.files;
     if (!files) return;
 
-    const currentPreviews = form.getValues(fieldName) || [];
-    const newPreviews = [...currentPreviews];
+    const currentValues = form.getValues(fieldName) || [];
+    const newValues: string[] = [...currentValues];
+    const newPreviews: string[] = fieldName === 'questionImages' ? [...questionPreviews] : [...answerPreviews];
 
-    Array.from(files).forEach(file => {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit per file
-        form.setError(fieldName, { message: 'File must be less than 5MB.' });
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (loadEvent) => {
-        const base64 = loadEvent.target?.result as string;
-        newPreviews.push(base64);
-        setPreviews([...newPreviews]);
-        form.setValue(fieldName, newPreviews, { shouldValidate: true });
-      };
-      reader.onerror = () => {
-        form.setError(fieldName, { message: 'Failed to read file.' });
-      };
-      reader.readAsDataURL(file);
+    const filePromises = Array.from(files).map(file => {
+      return new Promise<void>((resolve, reject) => {
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit per file
+          form.setError(fieldName, { message: 'File must be less than 5MB.' });
+          reject(new Error('File size exceeded'));
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (loadEvent) => {
+          const base64 = loadEvent.target?.result as string;
+          newValues.push(base64);
+          newPreviews.push(base64);
+          resolve();
+        };
+        reader.onerror = () => {
+          form.setError(fieldName, { message: 'Failed to read file.' });
+          reject(new Error('Failed to read file'));
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    Promise.all(filePromises).then(() => {
+        if (fieldName === 'questionImages') {
+            setQuestionPreviews(newPreviews);
+        } else {
+            setAnswerPreviews(newPreviews);
+        }
+        form.setValue(fieldName, newValues, { shouldValidate: true });
+    }).catch(error => {
+        console.error(error);
     });
   };
 
   const removeImage = (
     index: number,
     fieldName: 'questionImages' | 'answerImages',
+    previews: string[],
     setPreviews: React.Dispatch<React.SetStateAction<string[]>>
   ) => {
-    const currentPreviews = form.getValues(fieldName) || [];
-    const newPreviews = currentPreviews.filter((_, i) => i !== index);
+    const newValues = (form.getValues(fieldName) || []).filter((_, i) => i !== index);
+    const newPreviews = previews.filter((_, i) => i !== index);
+    
     setPreviews(newPreviews);
-    form.setValue(fieldName, newPreviews, { shouldValidate: true });
+    form.setValue(fieldName, newValues, { shouldValidate: true });
   };
   
 
@@ -203,33 +219,26 @@ export default function AssessmentForm() {
             throw new Error(resultData.error);
         }
         
-        // Add frontend-specific data if not present
-        if (!resultData.task) {
-          resultData.task = {
-            type: data.taskType,
-            question: 'Question provided as image',
-            word_count: 0
-          }
+        const finalResult = { ...resultData };
+
+        if (!finalResult.task) {
+          finalResult.task = { type: data.taskType, question: '', word_count: 0 };
         }
-        if(data.question && data.questionInputType === 'text'){
-            resultData.task.question = data.question
-        }
-        
-        if (data.answer && data.answerInputType === 'text') {
-            resultData.task.word_count = data.answer.split(/\s+/).filter(Boolean).length;
+        if (data.questionInputType === 'text' && data.question) {
+          finalResult.task.question = data.question;
+        } else {
+          finalResult.task.question = 'Question provided as image';
         }
 
-        if (!resultData.candidate) {
-          resultData.candidate = {
-            name: data.candidateName,
-            email: data.candidateEmail
-          }
-        }
-        if(!resultData.transcribedAnswer) {
-          resultData.transcribedAnswer = data.answerInputType === 'text' ? (data.answer || '') : 'Answer provided as image';
+        if (data.answerInputType === 'text' && data.answer) {
+          finalResult.task.word_count = data.answer.split(/\s+/).filter(Boolean).length;
         }
 
-        dispatch({ type: 'SET_RESULT', payload: resultData });
+        if (!finalResult.transcribedAnswer) {
+          finalResult.transcribedAnswer = data.answerInputType === 'text' ? (data.answer || '') : 'Answer provided as image';
+        }
+
+        dispatch({ type: 'SET_RESULT', payload: finalResult });
         toast({ title: 'Assessment Complete!', description: 'Redirecting to your results...', variant: 'default' });
         router.push('/results');
 
@@ -263,10 +272,11 @@ export default function AssessmentForm() {
               <div key={index} className="relative aspect-video rounded-md overflow-hidden group bg-muted">
                 <Image src={preview} alt={`Upload preview ${index+1}`} layout="fill" objectFit="contain" />
                 <Button
+                  type="button"
                   variant="destructive"
                   size="icon"
                   className="absolute top-1 right-1 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => removeImage(index, fieldName, setPreviews)}
+                  onClick={() => removeImage(index, fieldName, previews, setPreviews)}
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -322,7 +332,7 @@ export default function AssessmentForm() {
                     <FormControl>
                       <RadioGroupItem value="Task 1 (General)" />
                     </FormControl>
-                    <FormLabel className="font-normal">Task 1 (General)</Form_Label>
+                    <FormLabel className="font-normal">Task 1 (General)</FormLabel>
                   </FormItem>
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
@@ -340,8 +350,9 @@ export default function AssessmentForm() {
         <div className="space-y-3">
             <FormLabel className="text-base font-semibold">2. Provide the Question</FormLabel>
             <Tabs value={questionInputType} onValueChange={(value) => {
-                setQuestionInputType(value as 'text' | 'image');
-                form.setValue('questionInputType', value as 'text' | 'image', { shouldValidate: true });
+                const newType = value as 'text' | 'image';
+                setQuestionInputType(newType);
+                form.setValue('questionInputType', newType, { shouldValidate: true });
             }} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="text">Type/Paste Text</TabsTrigger>
@@ -376,8 +387,9 @@ export default function AssessmentForm() {
         <div className="space-y-3">
             <FormLabel className="text-base font-semibold">3. Provide Your Answer</FormLabel>
             <Tabs value={answerInputType} onValueChange={(value) => {
-                setAnswerInputType(value as 'text' | 'image');
-                form.setValue('answerInputType', value as 'text' | 'image', { shouldValidate: true });
+                 const newType = value as 'text' | 'image';
+                setAnswerInputType(newType);
+                form.setValue('answerInputType', newType, { shouldValidate: true });
             }} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="text">Type/Paste Text</TabsTrigger>
@@ -458,3 +470,5 @@ export default function AssessmentForm() {
     </Form>
   );
 }
+
+    
