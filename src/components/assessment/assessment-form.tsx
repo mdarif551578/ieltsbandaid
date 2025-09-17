@@ -198,19 +198,21 @@ export default function AssessmentForm() {
       
       if (data.questionInputType === 'text') {
         formData.append('question_text', data.question || '');
-      } else if (data.questionImages) {
+      } else if (data.questionInputType === 'image' && data.questionImages) {
         data.questionImages.forEach((uri, index) => {
           const blob = dataURItoBlob(uri);
-          formData.append('question_images', blob, `question_image_${index}.png`);
+          // Use indexed field name as a workaround for some backends
+          formData.append(`question_images`, blob, `question_image_${index}.png`);
         });
       }
 
       if (data.answerInputType === 'text') {
         formData.append('answer_text', data.answer || '');
-      } else if (data.answerImages) {
+      } else if (data.answerInputType === 'image' && data.answerImages) {
         data.answerImages.forEach((uri, index) => {
           const blob = dataURItoBlob(uri);
-          formData.append('answer_images', blob, `answer_image_${index}.png`);
+          // Use indexed field name as a workaround for some backends
+          formData.append(`answer_images`, blob, `answer_image_${index}.png`);
         });
       }
 
@@ -220,22 +222,20 @@ export default function AssessmentForm() {
           body: formData,
         });
 
+        const resultData = await response.json();
+
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ detail: 'Failed to parse error response' }));
             let errorMessage = `Request failed with status ${response.status}`;
-            if (typeof errorData.detail === 'string') {
-              errorMessage = errorData.detail;
-            } else if (Array.isArray(errorData.detail)) {
-              errorMessage = errorData.detail.map((err: any) => `${err.loc.join(' -> ')}: ${err.msg}`).join(', ');
+            if (resultData.detail) {
+              if (typeof resultData.detail === 'string') {
+                errorMessage = resultData.detail;
+              } else if (Array.isArray(resultData.detail)) {
+                errorMessage = resultData.detail.map((err: any) => `${err.loc.join(' -> ')}: ${err.msg}`).join('; ');
+              }
+            } else if (resultData.error) {
+              errorMessage = resultData.error;
             }
             throw new Error(errorMessage);
-        }
-
-        const resultData: AssessmentResult = await response.json();
-
-        if ('error' in resultData) {
-            // @ts-ignore
-            throw new Error(resultData.error);
         }
         
         const finalResult = {
@@ -261,6 +261,8 @@ export default function AssessmentForm() {
           description: errorMessage,
           variant: 'destructive',
         });
+      } finally {
+        dispatch({ type: 'SET_LOADING', payload: false });
       }
     });
   }
@@ -364,6 +366,12 @@ export default function AssessmentForm() {
                 const newType = value as 'text' | 'image';
                 setQuestionInputType(newType);
                 form.setValue('questionInputType', newType, { shouldValidate: true });
+                if (newType === 'image') {
+                    form.setValue('question', '');
+                } else {
+                    form.setValue('questionImages', []);
+                    setQuestionPreviews([]);
+                }
             }} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="text">Type/Paste Text</TabsTrigger>
@@ -401,6 +409,12 @@ export default function AssessmentForm() {
                  const newType = value as 'text' | 'image';
                 setAnswerInputType(newType);
                 form.setValue('answerInputType', newType, { shouldValidate: true });
+                 if (newType === 'image') {
+                    form.setValue('answer', '');
+                } else {
+                    form.setValue('answerImages', []);
+                    setAnswerPreviews([]);
+                }
             }} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="text">Type/Paste Text</TabsTrigger>
@@ -481,3 +495,5 @@ export default function AssessmentForm() {
     </Form>
   );
 }
+
+    
