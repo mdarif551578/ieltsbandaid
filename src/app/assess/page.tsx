@@ -1,6 +1,6 @@
 import AssessmentForm from '@/components/assessment/assessment-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Lightbulb, BookCheck, Camera, Type } from 'lucide-react';
+import { Lightbulb, BookCheck, Camera, Type, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
@@ -55,8 +55,18 @@ export default function AssessPage() {
                         Not sure what to upload? Download our sample files to see how it works.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-2">
-                        <Button variant="link" className="p-0 h-auto justify-start">Sample Question.jpg</Button>
-                        <Button variant="link" className="p-0 h-auto justify-start">Sample Answer.jpg</Button>
+                        <Button variant="link" asChild className="p-0 h-auto justify-start">
+                            <a href="/sample-question.jpg" download>
+                               <Download className="mr-2 h-4 w-4" />
+                               Sample Question.jpg
+                            </a>
+                        </Button>
+                        <Button variant="link" asChild className="p-0 h-auto justify-start">
+                             <a href="/sample-answer.jpg" download>
+                                <Download className="mr-2 h-4 w-4" />
+                                Sample Answer.jpg
+                             </a>
+                        </Button>
                     </div>
                 </CardContent>
             </Card>
