@@ -59,13 +59,13 @@ export default function AssessPage() {
                             <p className="text-sm font-semibold mb-2">Sample Questions:</p>
                             <div className="flex flex-col gap-2">
                                 <Button variant="link" asChild className="p-0 h-auto justify-start">
-                                    <a href="/images/sample-question-01.jpg" target="_blank" rel="noopener noreferrer">
+                                    <a href="/sample-question-01.jpg" download>
                                        <Download className="mr-2 h-4 w-4" />
                                        Sample Question 1.jpg
                                     </a>
                                 </Button>
                                 <Button variant="link" asChild className="p-0 h-auto justify-start">
-                                     <a href="/images/sample-question-02.jpg" target="_blank" rel="noopener noreferrer">
+                                     <a href="/sample-question-02.jpg" download>
                                         <Download className="mr-2 h-4 w-4" />
                                         Sample Question 2.jpg
                                      </a>
@@ -76,13 +76,13 @@ export default function AssessPage() {
                             <p className="text-sm font-semibold mb-2">Sample Answers:</p>
                             <div className="flex flex-col gap-2">
                                 <Button variant="link" asChild className="p-0 h-auto justify-start">
-                                    <a href="/images/sample-answer-01.jpg" target="_blank" rel="noopener noreferrer">
+                                    <a href="/sample-answer-01.jpg" download>
                                        <Download className="mr-2 h-4 w-4" />
                                        Sample Answer 1.jpg
                                     </a>
                                 </Button>
                                 <Button variant="link" asChild className="p-0 h-auto justify-start">
-                                     <a href="/images/sample-answer-02.jpg" target="_blank" rel="noopener noreferrer">
+                                     <a href="/sample-answer-02.jpg" download>
                                         <Download className="mr-2 h-4 w-4" />
                                         Sample Answer 2.jpg
                                      </a>
