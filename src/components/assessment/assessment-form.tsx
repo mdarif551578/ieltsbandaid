@@ -198,7 +198,7 @@ export default function AssessmentForm() {
       
       if (data.questionInputType === 'text') {
         formData.append('question_text', data.question || '');
-      } else if (data.questionImages && data.questionImages.length > 0) {
+      } else if (data.questionImages) {
         data.questionImages.forEach((uri, index) => {
           const blob = dataURItoBlob(uri);
           formData.append('question_images', blob, `question_image_${index}.png`);
@@ -207,7 +207,7 @@ export default function AssessmentForm() {
 
       if (data.answerInputType === 'text') {
         formData.append('answer_text', data.answer || '');
-      } else if (data.answerImages && data.answerImages.length > 0) {
+      } else if (data.answerImages) {
         data.answerImages.forEach((uri, index) => {
           const blob = dataURItoBlob(uri);
           formData.append('answer_images', blob, `answer_image_${index}.png`);
@@ -221,8 +221,13 @@ export default function AssessmentForm() {
         });
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ error: 'Failed to parse error response' }));
-            const errorMessage = errorData?.detail || errorData?.error || `Request failed with status ${response.status}`;
+            const errorData = await response.json().catch(() => ({ detail: 'Failed to parse error response' }));
+            let errorMessage = `Request failed with status ${response.status}`;
+            if (typeof errorData.detail === 'string') {
+              errorMessage = errorData.detail;
+            } else if (Array.isArray(errorData.detail)) {
+              errorMessage = errorData.detail.map((err: any) => `${err.loc.join(' -> ')}: ${err.msg}`).join(', ');
+            }
             throw new Error(errorMessage);
         }
 
@@ -232,7 +237,7 @@ export default function AssessmentForm() {
             // @ts-ignore
             throw new Error(resultData.error);
         }
-
+        
         const finalResult = {
           ...resultData,
           task: {
