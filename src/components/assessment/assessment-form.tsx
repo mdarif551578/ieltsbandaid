@@ -19,7 +19,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAssessment } from '@/context/assessment-context';
 import { useRouter } from 'next/navigation';
-import { useTransition, useState, useId } from 'react';
+import { useTransition, useState, useId, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, PlusCircle, X } from 'lucide-react';
 import Image from 'next/image';
@@ -182,19 +182,20 @@ export default function AssessmentForm() {
       formData.append('name', data.candidateName);
       formData.append('email', data.candidateEmail);
       
-      // Always append text fields, even if empty
-      formData.append('question_text', data.questionInputType === 'text' ? data.question || '' : '');
-      formData.append('answer_text', data.answerInputType === 'text' ? data.answer || '' : '');
-
-      // Append images if they exist
-      if (data.questionInputType === 'image' && data.questionImages) {
+      // Conditionally append question text or images
+      if (data.questionInputType === 'text') {
+        formData.append('question_text', data.question || '');
+      } else if (data.questionImages) {
         data.questionImages.forEach((uri, index) => {
           const blob = dataURItoBlob(uri);
           formData.append('question_images', blob, `question_image_${index}.png`);
         });
       }
 
-      if (data.answerInputType === 'image' && data.answerImages) {
+      // Conditionally append answer text or images
+      if (data.answerInputType === 'text') {
+        formData.append('answer_text', data.answer || '');
+      } else if (data.answerImages) {
         data.answerImages.forEach((uri, index) => {
           const blob = dataURItoBlob(uri);
           formData.append('answer_images', blob, `answer_image_${index}.png`);
@@ -228,18 +229,21 @@ export default function AssessmentForm() {
         if (data.questionInputType === 'text' && data.question) {
           finalResult.task.question = data.question;
         } else {
-          finalResult.task.question = 'Question provided as image';
+          finalResult.task.question = resultData.task?.question || 'Question provided as image';
         }
 
         if (data.answerInputType === 'text' && data.answer) {
           finalResult.task.word_count = data.answer.split(/\s+/).filter(Boolean).length;
+        } else {
+           finalResult.task.word_count = resultData.task?.word_count || 0;
         }
 
         if (!finalResult.transcribedAnswer) {
-          finalResult.transcribedAnswer = data.answerInputType === 'text' ? (data.answer || '') : 'Answer provided as image';
+          finalResult.transcribedAnswer = data.answerInputType === 'text' ? (data.answer || '') : (resultData.transcribedAnswer || 'Answer provided as image');
         }
 
         dispatch({ type: 'SET_RESULT', payload: finalResult });
+        localStorage.setItem('assessmentResult', JSON.stringify(finalResult));
         toast({ title: 'Assessment Complete!', description: 'Redirecting to your results...', variant: 'default' });
         router.push('/results');
 
