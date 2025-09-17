@@ -182,20 +182,23 @@ export default function AssessmentForm() {
       formData.append('name', data.candidateName);
       formData.append('email', data.candidateEmail);
       
-      if (data.questionInputType === 'text' && data.question) {
-          formData.append('question_text', data.question);
+      // Send empty strings for text fields if they are not the chosen input type
+      if (data.questionInputType === 'text') {
+        formData.append('question_text', data.question || '');
       } else if (data.questionInputType === 'image' && data.questionImages) {
         data.questionImages.forEach((uri, index) => {
           const blob = dataURItoBlob(uri);
+          // The key should be `question_images` for all files in the list
           formData.append('question_images', blob, `question_image_${index}.png`);
         });
       }
 
-      if (data.answerInputType === 'text' && data.answer) {
-          formData.append('answer_text', data.answer);
+      if (data.answerInputType === 'text') {
+        formData.append('answer_text', data.answer || '');
       } else if (data.answerInputType === 'image' && data.answerImages) {
         data.answerImages.forEach((uri, index) => {
           const blob = dataURItoBlob(uri);
+          // The key should be `answer_images` for all files in the list
           formData.append('answer_images', blob, `answer_image_${index}.png`);
         });
       }
@@ -232,6 +235,8 @@ export default function AssessmentForm() {
 
         if (data.answerInputType === 'text' && data.answer) {
           finalResult.task.word_count = data.answer.split(/\s+/).filter(Boolean).length;
+        } else if (resultData.task?.word_count) {
+          finalResult.task.word_count = resultData.task.word_count
         }
 
         if (!finalResult.transcribedAnswer) {
@@ -250,6 +255,8 @@ export default function AssessmentForm() {
           description: errorMessage,
           variant: 'destructive',
         });
+      } finally {
+        dispatch({ type: 'SET_LOADING', payload: false });
       }
     });
   }
