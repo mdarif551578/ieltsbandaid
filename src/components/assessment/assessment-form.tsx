@@ -182,23 +182,21 @@ export default function AssessmentForm() {
       formData.append('name', data.candidateName);
       formData.append('email', data.candidateEmail);
       
-      // Send empty strings for text fields if they are not the chosen input type
-      if (data.questionInputType === 'text') {
-        formData.append('question_text', data.question || '');
-      } else if (data.questionInputType === 'image' && data.questionImages) {
+      // Always append text fields, even if empty
+      formData.append('question_text', data.questionInputType === 'text' ? data.question || '' : '');
+      formData.append('answer_text', data.answerInputType === 'text' ? data.answer || '' : '');
+
+      // Append images if they exist
+      if (data.questionInputType === 'image' && data.questionImages) {
         data.questionImages.forEach((uri, index) => {
           const blob = dataURItoBlob(uri);
-          // The key should be `question_images` for all files in the list
           formData.append('question_images', blob, `question_image_${index}.png`);
         });
       }
 
-      if (data.answerInputType === 'text') {
-        formData.append('answer_text', data.answer || '');
-      } else if (data.answerInputType === 'image' && data.answerImages) {
+      if (data.answerInputType === 'image' && data.answerImages) {
         data.answerImages.forEach((uri, index) => {
           const blob = dataURItoBlob(uri);
-          // The key should be `answer_images` for all files in the list
           formData.append('answer_images', blob, `answer_image_${index}.png`);
         });
       }
@@ -235,8 +233,6 @@ export default function AssessmentForm() {
 
         if (data.answerInputType === 'text' && data.answer) {
           finalResult.task.word_count = data.answer.split(/\s+/).filter(Boolean).length;
-        } else if (resultData.task?.word_count) {
-          finalResult.task.word_count = resultData.task.word_count
         }
 
         if (!finalResult.transcribedAnswer) {
@@ -255,8 +251,6 @@ export default function AssessmentForm() {
           description: errorMessage,
           variant: 'destructive',
         });
-      } finally {
-        dispatch({ type: 'SET_LOADING', payload: false });
       }
     });
   }
@@ -277,7 +271,7 @@ export default function AssessmentForm() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {previews.map((preview, index) => (
               <div key={index} className="relative aspect-video rounded-md overflow-hidden group bg-muted">
-                <Image src={preview} alt={`Upload preview ${index+1}`} layout="fill" objectFit="contain" />
+                <Image src={preview} alt={`Upload preview ${index+1}`} fill objectFit="contain" />
                 <Button
                   type="button"
                   variant="destructive"
@@ -477,5 +471,3 @@ export default function AssessmentForm() {
     </Form>
   );
 }
-
-    
