@@ -7,10 +7,10 @@ const formSchema = z.object({
   taskType: z.enum(['Task 1 (Academic)', 'Task 1 (General)', 'Task 2']),
   question: z.string().min(10, { message: 'Question must be at least 10 characters long.' }),
   answer: z.string().min(50, { message: 'Answer must be at least 50 characters long.' }),
-  questionImage: z.string().optional(),
-  answerImage: z.string().optional(),
-  candidateName: z.string().optional(),
-  candidateEmail: z.string().email().optional(),
+  questionImages: z.array(z.string()).optional(),
+  answerImages: z.array(z.string()).optional(),
+  candidateName: z.string().min(1, { message: 'Name is required.' }),
+  candidateEmail: z.string().email(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -67,12 +67,12 @@ export async function assessWriting(data: FormValues): Promise<ActionResult> {
 
     let { question, answer } = validation.data;
 
-    if (validation.data.questionImage) {
-        question = "Placeholder for transcribed question from image.";
+    if (validation.data.questionImages && validation.data.questionImages.length > 0) {
+        question = "Placeholder for transcribed question from images.";
     }
     
-    if (validation.data.answerImage) {
-        answer = "Placeholder for transcribed answer from image. This demonstrates that the image upload was successful and would be processed by the backend AI in a real scenario. The text is long enough to pass the minimum character validation.";
+    if (validation.data.answerImages && validation.data.answerImages.length > 0) {
+        answer = "Placeholder for transcribed answer from images. This demonstrates that the image upload was successful and would be processed by the backend AI in a real scenario. The text is long enough to pass the minimum character validation.";
     }
 
     // Simulate network delay

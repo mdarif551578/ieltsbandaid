@@ -6,10 +6,10 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const TranscribeImageToTextInputSchema = z.object({
-  photoDataUri: z
-    .string()
+  photoDataUris: z
+    .array(z.string())
     .describe(
-      "A photo of a handwritten response or question, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+      "Photos of a handwritten response or question, as data URIs that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
 });
 export type TranscribeImageToTextInput = z.infer<typeof TranscribeImageToTextInputSchema>;
@@ -29,9 +29,12 @@ const transcribeImageToTextPrompt = ai.definePrompt({
   name: 'transcribeImageToTextPrompt',
   input: {schema: TranscribeImageToTextInputSchema},
   output: {schema: TranscribeImageToTextOutputSchema},
-  prompt: `You are an AI that transcribes images to text. Extract the text in the image provided.
+  prompt: `You are an AI that transcribes images to text. Extract the text in the images provided. Combine the text from all images into a single response.
 
-Image: {{media url=photoDataUri}}`,
+{{#each photoDataUris}}
+Image: {{media url=this}}
+{{/each}}
+`,
 });
 
 const transcribeImageToTextFlow = ai.defineFlow(

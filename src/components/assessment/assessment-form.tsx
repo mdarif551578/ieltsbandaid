@@ -23,7 +23,7 @@ import { useRouter } from 'next/navigation';
 import { useTransition, useState, useId } from 'react';
 import { assessWriting } from '@/app/assess/actions';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, UploadCloud, Image as ImageIcon, X } from 'lucide-react';
+import { Loader2, UploadCloud, Image as ImageIcon, X, PlusCircle } from 'lucide-react';
 import Image from 'next/image';
 
 const formSchema = z.object({
@@ -32,12 +32,12 @@ const formSchema = z.object({
   }),
   question: z.string().optional(),
   answer: z.string().optional(),
-  questionImage: z.string().optional(),
-  answerImage: z.string().optional(),
-  candidateName: z.string().optional(),
-  candidateEmail: z.string().email({ message: "Invalid email address." }).optional().or(z.literal('')),
+  questionImages: z.array(z.string()).optional(),
+  answerImages: z.array(z.string()).optional(),
+  candidateName: z.string().min(1, 'Name is required.'),
+  candidateEmail: z.string().email({ message: "Invalid email address." }),
 }).superRefine((data, ctx) => {
-    if (!data.question && !data.questionImage) {
+    if (!data.question && (!data.questionImages || data.questionImages.length === 0)) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ['question'],
@@ -51,7 +51,7 @@ const formSchema = z.object({
         message: 'Question must be at least 10 characters.',
       });
     }
-    if (!data.answer && !data.answerImage) {
+    if (!data.answer && (!data.answerImages || data.answerImages.length === 0)) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ['answer'],
@@ -77,8 +77,9 @@ export default function AssessmentForm() {
 
   const [questionInputType, setQuestionInputType] = useState('text');
   const [answerInputType, setAnswerInputType] = useState('text');
-  const [questionPreview, setQuestionPreview] = useState<string | null>(null);
-  const [answerPreview, setAnswerPreview] = useState<string | null>(null);
+  
+  const [questionPreviews, setQuestionPreviews] = useState<string[]>([]);
+  const [answerPreviews, setAnswerPreviews] = useState<string[]>([]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -88,11 +89,18 @@ export default function AssessmentForm() {
       answer: '',
       candidateName: '',
       candidateEmail: '',
+      questionImages: [],
+      answerImages: [],
     },
     mode: 'onBlur'
   });
   
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'questionImage' | 'answerImage', setPreview: (p: string | null) => void) => {
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fieldName: 'questionImages' | 'answerImages',
+    setPreviews: (p: string[]) => void,
+    currentPreviews: string[]
+  ) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) { // 5MB limit
@@ -102,10 +110,14 @@ export default function AssessmentForm() {
       const reader = new FileReader();
       reader.onload = (loadEvent) => {
         const base64 = loadEvent.target?.result as string;
-        form.setValue(fieldName, base64, { shouldValidate: true });
-        setPreview(base64);
-        if (fieldName === 'questionImage') form.setValue('question', 'Image uploaded');
-        if (fieldName === 'answerImage') form.setValue('answer', 'Image uploaded');
+        const newPreviews = [...currentPreviews, base64];
+        setPreviews(newPreviews);
+        form.setValue(fieldName, newPreviews, { shouldValidate: true });
+
+        const correspondingTextField = fieldName === 'questionImages' ? 'question' : 'answer';
+        if (newPreviews.length > 0) {
+          form.setValue(correspondingTextField, 'Image uploaded');
+        }
       };
       reader.onerror = () => {
         form.setError(fieldName, { message: 'Failed to read file.' });
@@ -114,32 +126,43 @@ export default function AssessmentForm() {
     }
   };
 
+  const removeImage = (
+    index: number,
+    fieldName: 'questionImages' | 'answerImages',
+    previews: string[],
+    setPreviews: (p: string[]) => void
+  ) => {
+    const newPreviews = previews.filter((_, i) => i !== index);
+    setPreviews(newPreviews);
+    form.setValue(fieldName, newPreviews, { shouldValidate: true });
+
+    const correspondingTextField = fieldName === 'questionImages' ? 'question' : 'answer';
+    if (newPreviews.length === 0) {
+      form.setValue(correspondingTextField, '', { shouldValidate: true });
+    }
+  };
+
   function onSubmit(data: FormValues) {
     const finalData = { ...data };
     
     if (questionInputType === 'text') {
-        finalData.questionImage = undefined;
+        finalData.questionImages = [];
     } else {
         finalData.question = 'Image Uploaded';
     }
 
     if (answerInputType === 'text') {
-        finalData.answerImage = undefined;
+        finalData.answerImages = [];
     } else {
         finalData.answer = 'Image Uploaded';
     }
 
     startTransition(async () => {
       dispatch({ type: 'SET_LOADING', payload: true });
-      // Pass a cleaned version of data to the server action
       const result = await assessWriting({
-        taskType: finalData.taskType,
+        ...finalData,
         question: finalData.question || '',
         answer: finalData.answer || '',
-        questionImage: finalData.questionImage,
-        answerImage: finalData.answerImage,
-        candidateName: finalData.candidateName,
-        candidateEmail: finalData.candidateEmail,
       });
 
       if (result.success && result.data) {
@@ -158,15 +181,13 @@ export default function AssessmentForm() {
   }
   
   const FileInput = ({
-    field,
     fieldName,
-    preview,
-    setPreview,
+    previews,
+    setPreviews,
   }: {
-    field: any;
-    fieldName: 'questionImage' | 'answerImage';
-    preview: string | null;
-    setPreview: (p: string | null) => void;
+    fieldName: 'questionImages' | 'answerImages';
+    previews: string[];
+    setPreviews: (p: string[]) => void;
   }) => {
     const id = useId();
     return (
@@ -174,45 +195,52 @@ export default function AssessmentForm() {
         <FormControl>
           <Card className="border-2 border-dashed hover:border-primary transition-colors">
             <CardContent className="p-4">
-              {preview ? (
-                <div className="relative aspect-video">
-                  <Image src={preview} alt="Upload preview" layout="fill" objectFit="contain" className="rounded-md" />
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    className="absolute -top-3 -right-3 h-7 w-7 rounded-full"
-                    onClick={() => {
-                      setPreview(null);
-                      form.setValue(fieldName, undefined, { shouldValidate: true });
-                      const correspondingTextField = fieldName === 'questionImage' ? 'question' : 'answer';
-                      form.setValue(correspondingTextField, '', { shouldValidate: true });
-                    }}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {previews.map((preview, index) => (
+                  <div key={index} className="relative aspect-video">
+                    <Image src={preview} alt={`Upload preview ${index+1}`} layout="fill" objectFit="contain" className="rounded-md" />
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                      onClick={() => removeImage(index, fieldName, previews, setPreviews)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                 <label
+                  htmlFor={id}
+                  className="flex flex-col items-center justify-center text-center p-6 cursor-pointer aspect-video bg-muted/50 rounded-md hover:bg-muted"
+                >
+                  <PlusCircle className="mx-auto h-8 w-8 text-muted-foreground" />
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Add Image
+                  </p>
+                  <Input
+                    type="file"
+                    id={id}
+                    accept="image/jpeg,image/png"
+                    className="sr-only"
+                    onChange={(e) => handleFileChange(e, fieldName, setPreviews, previews)}
+                    value=""
+                  />
+                </label>
+              </div>
+              {previews.length === 0 && (
                 <label
                   htmlFor={id}
                   className="flex flex-col items-center justify-center text-center p-6 cursor-pointer"
                 >
                   <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
                   <p className="mt-2 text-sm text-muted-foreground">
-                    Drag & drop or click to upload an image
+                    Drag & drop or click to upload image(s)
                   </p>
                    <span className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary">
                       <ImageIcon className="h-4 w-4" />
                       Select File
                     </span>
                   <p className="text-xs text-muted-foreground mt-1">.jpg, .png, .jpeg up to 5MB</p>
-                  <Input
-                    {...field}
-                    type="file"
-                    id={id}
-                    accept="image/jpeg,image/png"
-                    className="sr-only"
-                    onChange={(e) => handleFileChange(e, fieldName, setPreview)}
-                  />
                 </label>
               )}
             </CardContent>
@@ -268,7 +296,7 @@ export default function AssessmentForm() {
             <Tabs value={questionInputType} onValueChange={setQuestionInputType} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="text">Type/Paste Text</TabsTrigger>
-                    <TabsTrigger value="image">Upload Image</TabsTrigger>
+                    <TabsTrigger value="image">Upload Image(s)</TabsTrigger>
                 </TabsList>
                 <TabsContent value="text">
                     <FormField
@@ -285,11 +313,7 @@ export default function AssessmentForm() {
                     />
                 </TabsContent>
                 <TabsContent value="image">
-                    <FormField
-                      control={form.control}
-                      name="questionImage"
-                      render={({ field }) => <FileInput field={field} fieldName="questionImage" preview={questionPreview} setPreview={setQuestionPreview} />}
-                    />
+                    <FileInput fieldName="questionImages" previews={questionPreviews} setPreviews={setQuestionPreviews} />
                 </TabsContent>
             </Tabs>
         </div>
@@ -299,7 +323,7 @@ export default function AssessmentForm() {
             <Tabs value={answerInputType} onValueChange={setAnswerInputType} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="text">Type/Paste Text</TabsTrigger>
-                    <TabsTrigger value="image">Upload Image</TabsTrigger>
+                    <TabsTrigger value="image">Upload Image(s)</TabsTrigger>
                 </TabsList>
                 <TabsContent value="text">
                     <FormField
@@ -319,17 +343,13 @@ export default function AssessmentForm() {
                     />
                 </TabsContent>
                 <TabsContent value="image">
-                    <FormField
-                      control={form.control}
-                      name="answerImage"
-                      render={({ field }) => <FileInput field={field} fieldName="answerImage" preview={answerPreview} setPreview={setAnswerPreview} />}
-                    />
+                    <FileInput fieldName="answerImages" previews={answerPreviews} setPreviews={setAnswerPreviews} />
                 </TabsContent>
             </Tabs>
         </div>
         
         <div className="space-y-3">
-             <FormLabel className="text-base font-semibold">4. Candidate Info (Optional)</FormLabel>
+             <FormLabel className="text-base font-semibold">4. Candidate Info</FormLabel>
              <div className="grid sm:grid-cols-2 gap-4">
                  <FormField
                   control={form.control}

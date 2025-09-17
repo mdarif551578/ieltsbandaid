@@ -16,8 +16,8 @@ const EvaluateIELTSWritingInputSchema = z.object({
   taskType: z.enum(['Task 1 (Academic)', 'Task 1 (General)', 'Task 2']).describe('The type of IELTS writing task.'),
   question: z.string().describe('The IELTS writing task question.'),
   answer: z.string().describe('The candidate\'s answer to the IELTS writing task.'),
-  candidateName: z.string().optional().describe('The name of the candidate (optional).'),
-  candidateEmail: z.string().email().optional().describe('The email of the candidate (optional).'),
+  candidateName: z.string().describe('The name of the candidate.'),
+  candidateEmail: z.string().email().describe('The email of the candidate.'),
 });
 
 export type EvaluateIELTSWritingInput = z.infer<typeof EvaluateIELTSWritingInputSchema>;
