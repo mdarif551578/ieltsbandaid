@@ -157,7 +157,7 @@ export default function AssessmentForm() {
           form.setError(fieldName, { message: 'Failed to read file.' });
           reject(new Error('Failed to read file'));
         };
-        reader.readAsDataURL(file);
+        reader.readDataURL(file);
       });
     });
 
@@ -193,12 +193,17 @@ export default function AssessmentForm() {
       
       const formData = new FormData();
       formData.append('task_type', data.taskType);
-      formData.append('name', data.candidateName);
-      formData.append('email', data.candidateEmail);
+      
+      if (data.candidateName) {
+        formData.append('name', data.candidateName);
+      }
+      if (data.candidateEmail) {
+        formData.append('email', data.candidateEmail);
+      }
       
       if (data.questionInputType === 'text') {
         formData.append('question_text', data.question || '');
-      } else if (data.questionInputType === 'image' && data.questionImages) {
+      } else if (data.questionInputType === 'image' && data.questionImages && data.questionImages.length > 0) {
         data.questionImages.forEach((uri, index) => {
           const blob = dataURItoBlob(uri);
           formData.append('question_images', blob, `question_image_${index}.png`);
@@ -207,7 +212,7 @@ export default function AssessmentForm() {
 
       if (data.answerInputType === 'text') {
         formData.append('answer_text', data.answer || '');
-      } else if (data.answerInputType === 'image' && data.answerImages) {
+      } else if (data.answerInputType === 'image' && data.answerImages && data.answerImages.length > 0) {
         data.answerImages.forEach((uri, index) => {
           const blob = dataURItoBlob(uri);
           formData.append('answer_images', blob, `answer_image_${index}.png`);
@@ -493,5 +498,7 @@ export default function AssessmentForm() {
     </Form>
   );
 }
+
+    
 
     
