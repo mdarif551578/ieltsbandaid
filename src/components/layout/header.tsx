@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, PenTool } from 'lucide-react';
+import { Menu, GraduationCap } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -23,8 +23,8 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         <Link href="/" className="mr-6 flex items-center space-x-2">
-          <PenTool className="h-6 w-6 text-primary" />
-          <span className="font-bold font-headline text-lg">IELTS BandAid</span>
+          <GraduationCap className="h-6 w-6 text-primary" />
+          <span className="font-bold text-lg hidden sm:inline-block">IeltsBandBoost</span>
         </Link>
         <nav className="hidden items-center space-x-6 text-sm font-medium md:flex">
           {navLinks.map((link) => (
@@ -33,7 +33,7 @@ export default function Header() {
               href={link.href}
               className={cn(
                 'transition-colors hover:text-primary',
-                pathname === link.href ? 'text-primary' : 'text-muted-foreground'
+                pathname === link.href ? 'text-foreground font-semibold' : 'text-muted-foreground'
               )}
             >
               {link.label}
@@ -41,7 +41,7 @@ export default function Header() {
           ))}
         </nav>
         <div className="flex flex-1 items-center justify-end space-x-4">
-          <Button asChild className="hidden md:inline-flex bg-accent text-accent-foreground hover:bg-accent/90">
+          <Button asChild className="hidden md:inline-flex" variant="default">
             <Link href="/assess">Start Assessment</Link>
           </Button>
           <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
@@ -53,8 +53,8 @@ export default function Header() {
             </SheetTrigger>
             <SheetContent side="left">
               <Link href="/" className="mr-6 flex items-center space-x-2 mb-6">
-                <PenTool className="h-6 w-6 text-primary" />
-                <span className="font-bold font-headline">IELTS BandAid</span>
+                <GraduationCap className="h-6 w-6 text-primary" />
+                <span className="font-bold">IeltsBandBoost</span>
               </Link>
               <div className="flex flex-col space-y-4">
                 {navLinks.map((link) => (
@@ -70,7 +70,7 @@ export default function Header() {
                     {link.label}
                   </Link>
                 ))}
-                <Button asChild className="mt-4 bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => setSheetOpen(false)}>
+                <Button asChild className="mt-4" onClick={() => setSheetOpen(false)}>
                   <Link href="/assess">Start Assessment</Link>
                 </Button>
               </div>

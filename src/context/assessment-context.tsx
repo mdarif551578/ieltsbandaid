@@ -1,9 +1,47 @@
 'use client';
 
 import { createContext, useContext, useReducer, Dispatch, ReactNode } from 'react';
-import type { EvaluateIELTSWritingOutput } from '@/ai/flows/evaluate-ielts-writing';
 
-export type AssessmentResult = EvaluateIELTSWritingOutput;
+// This will be the shape of our AI's evaluation result
+export interface AssessmentResult {
+  overallBandScore: number;
+  cefrLevel: string;
+  taskAchievementResponse: {
+    bandScore: number;
+    justification: string;
+    strengths: string[];
+    weaknesses: string[];
+    improvements: string[];
+  };
+  coherenceAndCohesion: {
+    bandScore: number;
+    justification: string;
+    strengths: string[];
+    weaknesses: string[];
+    improvements: string[];
+  };
+  lexicalResource: {
+    bandScore: number;
+    justification: string;
+    strengths: string[];
+    weaknesses: string[];
+    improvements: string[];
+  };
+  grammaticalRangeAndAccuracy: {
+    bandScore: number;
+    justification: string;
+    strengths: string[];
+    weaknesses: string[];
+    improvements: string[];
+  };
+  overallStrengths: string[];
+  overallWeaknesses: string[];
+  keyRecommendations: string[];
+  transcribedAnswer: string;
+  question: string;
+  taskType: string;
+}
+
 
 type State = {
   isLoading: boolean;
@@ -34,7 +72,7 @@ function assessmentReducer(state: State, action: Action): State {
     case 'SET_RESULT':
       return { ...state, result: action.payload, isLoading: false, error: null };
     case 'SET_ERROR':
-      return { ...state, error: action.payload, isLoading: false };
+      return { ...state, error: action.payload, isLoading: false, result: null };
     default:
       return state;
   }

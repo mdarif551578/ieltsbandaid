@@ -1,12 +1,13 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -19,20 +20,51 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAssessment } from '@/context/assessment-context';
 import { useRouter } from 'next/navigation';
-import { useTransition, useState } from 'react';
+import { useTransition, useState, useId } from 'react';
 import { assessWriting } from '@/app/assess/actions';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, UploadCloud, Image as ImageIcon } from 'lucide-react';
+import { Loader2, UploadCloud, Image as ImageIcon, X } from 'lucide-react';
 import Image from 'next/image';
 
 const formSchema = z.object({
   taskType: z.enum(['Task 1 (Academic)', 'Task 1 (General)', 'Task 2'], {
     required_error: 'You need to select a task type.',
   }),
-  question: z.string().min(10, 'Question must be at least 10 characters.'),
-  answer: z.string().min(50, 'Answer must be at least 50 characters to be evaluated.'),
+  question: z.string().optional(),
+  answer: z.string().optional(),
   questionImage: z.string().optional(),
   answerImage: z.string().optional(),
+  candidateName: z.string().optional(),
+  candidateEmail: z.string().email({ message: "Invalid email address." }).optional().or(z.literal('')),
+}).superRefine((data, ctx) => {
+    if (!data.question && !data.questionImage) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['question'],
+            message: 'Please provide the question by typing or uploading an image.',
+        });
+    }
+    if (data.question && data.question.length < 10) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['question'],
+        message: 'Question must be at least 10 characters.',
+      });
+    }
+    if (!data.answer && !data.answerImage) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['answer'],
+            message: 'Please provide your answer by typing or uploading an image.',
+        });
+    }
+    if (data.answer && data.answer.length < 50) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['answer'],
+        message: 'Answer must be at least 50 characters to be evaluated.',
+      });
+    }
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -54,7 +86,10 @@ export default function AssessmentForm() {
       taskType: 'Task 2',
       question: '',
       answer: '',
+      candidateName: '',
+      candidateEmail: '',
     },
+    mode: 'onBlur'
   });
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'questionImage' | 'answerImage', setPreview: (p: string | null) => void) => {
@@ -81,85 +116,112 @@ export default function AssessmentForm() {
 
   function onSubmit(data: FormValues) {
     const finalData = { ...data };
-    if (questionInputType === 'text') finalData.questionImage = undefined;
-    if (answerInputType === 'text') finalData.answerImage = undefined;
-    if (questionInputType === 'image' && !finalData.questionImage) {
-      form.setError('questionImage', { message: 'Please upload an image for the question.' });
-      return;
+    
+    if (questionInputType === 'text') {
+        finalData.questionImage = undefined;
+    } else {
+        finalData.question = 'Image Uploaded';
     }
-    if (answerInputType === 'image' && !finalData.answerImage) {
-      form.setError('answerImage', { message: 'Please upload an image for the answer.' });
-      return;
+
+    if (answerInputType === 'text') {
+        finalData.answerImage = undefined;
+    } else {
+        finalData.answer = 'Image Uploaded';
     }
 
     startTransition(async () => {
       dispatch({ type: 'SET_LOADING', payload: true });
-      const result = await assessWriting(finalData);
+      // Pass a cleaned version of data to the server action
+      const result = await assessWriting({
+        taskType: finalData.taskType,
+        question: finalData.question || '',
+        answer: finalData.answer || '',
+        questionImage: finalData.questionImage,
+        answerImage: finalData.answerImage,
+        candidateName: finalData.candidateName,
+        candidateEmail: finalData.candidateEmail,
+      });
+
       if (result.success && result.data) {
         dispatch({ type: 'SET_RESULT', payload: result.data });
-        toast({ title: 'Assessment Complete!', description: 'Redirecting to your results...' });
+        toast({ title: 'Assessment Complete!', description: 'Redirecting to your results...', variant: 'default' });
         router.push('/results');
       } else {
         dispatch({ type: 'SET_ERROR', payload: result.error || 'An unknown error occurred.' });
         toast({
           title: 'Assessment Failed',
-          description: result.error || 'Please try again later.',
+          description: result.error || 'Please check your inputs and try again.',
           variant: 'destructive',
         });
       }
     });
   }
-
-  const renderFileInput = (fieldName: 'questionImage' | 'answerImage', preview: string | null, setPreview: (p:string | null) => void) => (
-    <FormField
-      control={form.control}
-      name={fieldName}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel className="sr-only">{fieldName}</FormLabel>
-          <FormControl>
-            <Card className="border-2 border-dashed">
-                <CardContent className="p-6">
-                    {preview ? (
-                        <div className="relative aspect-video">
-                            <Image src={preview} alt="Upload preview" layout="fill" objectFit="contain" />
-                            <Button variant="ghost" size="sm" className="absolute top-2 right-2" onClick={() => {
-                                setPreview(null);
-                                form.setValue(fieldName, undefined);
-                                if (fieldName === 'questionImage') form.setValue('question', '');
-                                if (fieldName === 'answerImage') form.setValue('answer', '');
-                            }}>Remove</Button>
-                        </div>
-                    ) : (
-                        <div className="text-center">
-                            <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
-                            <p className="mt-2 text-sm text-muted-foreground">
-                                Drag & drop or click to upload an image (.jpg, .png)
-                            </p>
-                            <Input
-                                {...form.register(fieldName)}
-                                type="file"
-                                accept="image/jpeg,image/png"
-                                className="sr-only"
-                                id={fieldName}
-                                onChange={(e) => handleFileChange(e, fieldName, setPreview)}
-                            />
-                            <label htmlFor={fieldName} className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary cursor-pointer">
-                                <ImageIcon className="h-4 w-4" />
-                                Select File
-                            </label>
-                            <p className="text-xs text-muted-foreground mt-1">Max file size: 5MB</p>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  );
   
+  const FileInput = ({
+    field,
+    fieldName,
+    preview,
+    setPreview,
+  }: {
+    field: any;
+    fieldName: 'questionImage' | 'answerImage';
+    preview: string | null;
+    setPreview: (p: string | null) => void;
+  }) => {
+    const id = useId();
+    return (
+      <FormItem>
+        <FormControl>
+          <Card className="border-2 border-dashed hover:border-primary transition-colors">
+            <CardContent className="p-4">
+              {preview ? (
+                <div className="relative aspect-video">
+                  <Image src={preview} alt="Upload preview" layout="fill" objectFit="contain" className="rounded-md" />
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute -top-3 -right-3 h-7 w-7 rounded-full"
+                    onClick={() => {
+                      setPreview(null);
+                      form.setValue(fieldName, undefined, { shouldValidate: true });
+                      const correspondingTextField = fieldName === 'questionImage' ? 'question' : 'answer';
+                      form.setValue(correspondingTextField, '', { shouldValidate: true });
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <label
+                  htmlFor={id}
+                  className="flex flex-col items-center justify-center text-center p-6 cursor-pointer"
+                >
+                  <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Drag & drop or click to upload an image
+                  </p>
+                   <span className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary">
+                      <ImageIcon className="h-4 w-4" />
+                      Select File
+                    </span>
+                  <p className="text-xs text-muted-foreground mt-1">.jpg, .png, .jpeg up to 5MB</p>
+                  <Input
+                    {...field}
+                    type="file"
+                    id={id}
+                    accept="image/jpeg,image/png"
+                    className="sr-only"
+                    onChange={(e) => handleFileChange(e, fieldName, setPreview)}
+                  />
+                </label>
+              )}
+            </CardContent>
+          </Card>
+        </FormControl>
+        <FormMessage />
+      </FormItem>
+    );
+  };
 
   return (
     <Form {...form}>
@@ -169,7 +231,7 @@ export default function AssessmentForm() {
           name="taskType"
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel className="text-lg font-semibold font-headline">1. Select Task Type</FormLabel>
+              <FormLabel className="text-base font-semibold">1. Select Task Type</FormLabel>
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
@@ -202,9 +264,9 @@ export default function AssessmentForm() {
         />
 
         <div className="space-y-3">
-            <FormLabel className="text-lg font-semibold font-headline">2. Provide the Question</FormLabel>
+            <FormLabel className="text-base font-semibold">2. Provide the Question</FormLabel>
             <Tabs value={questionInputType} onValueChange={setQuestionInputType} className="w-full">
-                <TabsList>
+                <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="text">Type/Paste Text</TabsTrigger>
                     <TabsTrigger value="image">Upload Image</TabsTrigger>
                 </TabsList>
@@ -215,7 +277,7 @@ export default function AssessmentForm() {
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Textarea placeholder="Type or paste the IELTS question here..." {...field} rows={5} />
+                            <Textarea placeholder="Type or paste the IELTS question here..." {...field} rows={5} disabled={questionInputType === 'image'}/>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -223,15 +285,19 @@ export default function AssessmentForm() {
                     />
                 </TabsContent>
                 <TabsContent value="image">
-                    {renderFileInput('questionImage', questionPreview, setQuestionPreview)}
+                    <FormField
+                      control={form.control}
+                      name="questionImage"
+                      render={({ field }) => <FileInput field={field} fieldName="questionImage" preview={questionPreview} setPreview={setQuestionPreview} />}
+                    />
                 </TabsContent>
             </Tabs>
         </div>
 
         <div className="space-y-3">
-            <FormLabel className="text-lg font-semibold font-headline">3. Provide Your Answer</FormLabel>
+            <FormLabel className="text-base font-semibold">3. Provide Your Answer</FormLabel>
             <Tabs value={answerInputType} onValueChange={setAnswerInputType} className="w-full">
-                <TabsList>
+                <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="text">Type/Paste Text</TabsTrigger>
                     <TabsTrigger value="image">Upload Image</TabsTrigger>
                 </TabsList>
@@ -242,17 +308,56 @@ export default function AssessmentForm() {
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Textarea placeholder="Type or paste your full essay here..." {...field} rows={15} />
+                            <Textarea placeholder="Type or paste your full essay here..." {...field} rows={15} disabled={answerInputType === 'image'}/>
                           </FormControl>
+                           <FormDescription>
+                             Aim for over 150 words for Task 1 and 250 for Task 2.
+                           </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                 </TabsContent>
                 <TabsContent value="image">
-                    {renderFileInput('answerImage', answerPreview, setAnswerPreview)}
+                    <FormField
+                      control={form.control}
+                      name="answerImage"
+                      render={({ field }) => <FileInput field={field} fieldName="answerImage" preview={answerPreview} setPreview={setAnswerPreview} />}
+                    />
                 </TabsContent>
             </Tabs>
+        </div>
+        
+        <div className="space-y-3">
+             <FormLabel className="text-base font-semibold">4. Candidate Info (Optional)</FormLabel>
+             <div className="grid sm:grid-cols-2 gap-4">
+                 <FormField
+                  control={form.control}
+                  name="candidateName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm">Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., John Doe" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="candidateEmail"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm">Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., john.doe@example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+             </div>
         </div>
 
         <Button type="submit" disabled={isPending} className="w-full md:w-auto" size="lg">

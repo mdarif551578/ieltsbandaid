@@ -1,5 +1,4 @@
 import type {Config} from 'tailwindcss';
-
 const {fontFamily} = require('tailwindcss/defaultTheme');
 
 export default {
@@ -12,15 +11,14 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: '2rem',
+      padding: '1.5rem',
       screens: {
         '2xl': '1400px',
       },
     },
     extend: {
       fontFamily: {
-        headline: ['var(--font-space-grotesk)', ...fontFamily.sans],
-        body: ['var(--font-inter)', ...fontFamily.sans],
+        body: ['var(--font-body)', ...fontFamily.sans],
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -76,7 +74,18 @@ export default {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
+       typography: (theme: (arg0: string) => any) => ({
+        DEFAULT: {
+          css: {
+            h4: {
+                color: theme('colors.foreground'),
+                marginBottom: theme('spacing.2'),
+                marginTop: theme('spacing.4'),
+            },
+          },
+        },
+      }),
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
 } satisfies Config;

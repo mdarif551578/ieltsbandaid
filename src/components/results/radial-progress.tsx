@@ -7,9 +7,9 @@ interface RadialProgressProps {
 }
 
 const RadialProgress: React.FC<RadialProgressProps> = ({ progress, score, colorClass }) => {
-  const radius = 56;
+  const radius = 64;
   const stroke = 12;
-  const normalizedRadius = radius - stroke / 2;
+  const normalizedRadius = radius - stroke;
   const circumference = normalizedRadius * 2 * Math.PI;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
@@ -21,7 +21,8 @@ const RadialProgress: React.FC<RadialProgressProps> = ({ progress, score, colorC
         className="transform -rotate-90"
       >
         <circle
-          stroke="hsl(var(--border))"
+          className="text-muted/50"
+          stroke="currentColor"
           fill="transparent"
           strokeWidth={stroke}
           r={normalizedRadius}
@@ -29,7 +30,8 @@ const RadialProgress: React.FC<RadialProgressProps> = ({ progress, score, colorC
           cy={radius}
         />
         <circle
-          className={`transition-all duration-500 ease-in-out stroke-current text-${colorClass}`}
+          className={`transition-all duration-1000 ease-in-out ${colorClass}`}
+          stroke="currentColor"
           fill="transparent"
           strokeWidth={stroke}
           strokeDasharray={circumference + ' ' + circumference}
@@ -40,7 +42,7 @@ const RadialProgress: React.FC<RadialProgressProps> = ({ progress, score, colorC
           cy={radius}
         />
       </svg>
-      <div className={`absolute inset-0 flex items-center justify-center text-3xl font-bold font-headline text-${colorClass}`}>
+      <div className={`absolute inset-0 flex items-center justify-center text-4xl font-bold ${colorClass}`}>
         {score.toFixed(1)}
       </div>
     </div>

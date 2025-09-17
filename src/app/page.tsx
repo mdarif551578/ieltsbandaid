@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, BrainCircuit, BarChart, PenSquare } from 'lucide-react';
+import { CheckCircle, Zap, BrainCircuit, BarChart } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { placeholderImages } from '@/lib/placeholder-images';
@@ -17,7 +17,7 @@ const features = [
     description: 'Receive specific suggestions and examples to improve your writing.',
   },
   {
-    icon: <PenSquare className="h-8 w-8 text-primary" />,
+    icon: <Zap className="h-8 w-8 text-primary" />,
     title: 'Free & Easy to Use',
     description: 'Simply upload or type your essay and get your assessment in seconds.',
   },
@@ -49,7 +49,7 @@ const steps = [
 const testimonials = [
   {
     name: 'Priya S.',
-    quote: "IELTS BandAid was a game-changer! The detailed feedback helped me jump from a 6.5 to a 7.5 in just two weeks.",
+    quote: "IeltsBandBoost was a game-changer! The detailed feedback helped me jump from a 6.5 to a 7.5 in just two weeks.",
     image: placeholderImages.find(p => p.id === "testimonial-1")
   },
   {
@@ -77,13 +77,13 @@ export default function Home() {
         )}
         <div className="absolute inset-0 bg-black/50 -z-10" />
         <div className="container mx-auto px-4 md:px-6 text-center text-primary-foreground">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-bold tracking-tight">
-            Boost Your IELTS Writing Score with AI
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight">
+            Boost Your IELTS Writing Score with AI Feedback
           </h1>
-          <p className="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-primary-foreground/90">
-            Get instant, expert-level analysis of your IELTS writing tasks based on official criteria.
+          <p className="mt-4 max-w-3xl mx-auto text-lg md:text-xl text-primary-foreground/90">
+            Upload your essay and get instant, expert-level analysis based on official criteria.
           </p>
-          <Button asChild size="lg" className="mt-8 bg-accent text-accent-foreground hover:bg-accent/90">
+          <Button asChild size="lg" className="mt-8 bg-secondary hover:bg-secondary/90">
             <Link href="/assess">Start Free Assessment</Link>
           </Button>
         </div>
@@ -91,18 +91,18 @@ export default function Home() {
 
       <section id="features" className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4 md:px-6">
-          <h2 className="text-3xl md:text-4xl font-headline font-bold text-center">
-            Why Choose IELTS BandAid?
+          <h2 className="text-3xl md:text-4xl font-bold text-center">
+            Why Choose IeltsBandBoost?
           </h2>
           <p className="mt-4 max-w-2xl mx-auto text-center text-muted-foreground">
             Our platform is designed to give you the edge you need to succeed.
           </p>
           <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((feature) => (
-              <Card key={feature.title} className="text-center bg-card border-2 border-transparent hover:border-primary hover:shadow-lg transition-all">
+              <Card key={feature.title} className="text-center bg-card border hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                 <CardHeader className="items-center">
                   {feature.icon}
-                  <CardTitle className="mt-4 font-headline">{feature.title}</CardTitle>
+                  <CardTitle className="mt-4 font-semibold">{feature.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">{feature.description}</p>
@@ -113,20 +113,19 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="how-it-works" className="py-16 md:py-24 bg-secondary/50">
+      <section id="how-it-works" className="py-16 md:py-24 bg-muted/50">
         <div className="container mx-auto px-4 md:px-6">
-          <h2 className="text-3xl md:text-4xl font-headline font-bold text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-center">
             How It Works in 3 Simple Steps
           </h2>
           <div className="mt-12 max-w-4xl mx-auto grid md:grid-cols-3 gap-8 md:gap-4 relative">
-             <div className="absolute top-1/2 left-0 w-full h-0.5 bg-border hidden md:block" />
+             <div className="absolute top-8 left-0 w-full h-0.5 bg-border hidden md:block" />
              {steps.map((step, index) => (
               <div key={step.step} className="relative flex flex-col items-center text-center">
-                <div className="absolute top-1/2 left-0 w-full h-0.5 bg-border hidden md:block" />
-                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground font-bold text-2xl z-10 border-4 border-secondary/50">
+                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground font-bold text-2xl z-10 border-4 border-muted/50">
                   {step.step}
                 </div>
-                <h3 className="mt-6 text-xl font-headline font-semibold">{step.title}</h3>
+                <h3 className="mt-6 text-xl font-semibold">{step.title}</h3>
                 <p className="mt-2 text-muted-foreground">{step.description}</p>
               </div>
             ))}
@@ -136,12 +135,12 @@ export default function Home() {
 
       <section id="testimonials" className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4 md:px-6">
-          <h2 className="text-3xl md:text-4xl font-headline font-bold text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-center">
             Loved by Students Worldwide
           </h2>
           <div className="mt-12 max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
             {testimonials.map((testimonial) => testimonial.image && (
-              <Card key={testimonial.name} className="flex flex-col items-center text-center p-6">
+              <Card key={testimonial.name} className="flex flex-col items-center text-center p-6 bg-muted/30">
                 <Image
                   src={testimonial.image.imageUrl}
                   alt={`Testimonial from ${testimonial.name}`}
@@ -150,8 +149,8 @@ export default function Home() {
                   className="rounded-full"
                   data-ai-hint={testimonial.image.imageHint}
                 />
-                <p className="mt-4 text-lg italic text-foreground">"{testimonial.quote}"</p>
-                <p className="mt-2 font-semibold text-primary">- {testimonial.name}</p>
+                <blockquote className="mt-4 text-lg italic text-foreground">"{testimonial.quote}"</blockquote>
+                <cite className="mt-2 font-semibold text-primary not-italic">- {testimonial.name}</cite>
               </Card>
             ))}
           </div>

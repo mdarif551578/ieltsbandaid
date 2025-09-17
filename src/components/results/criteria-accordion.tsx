@@ -7,7 +7,9 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { ThumbsUp, ThumbsDown, ArrowRight } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Target } from 'lucide-react';
+import type { VariantProps } from 'class-variance-authority';
+import { badgeVariants } from '@/components/ui/badge';
 
 interface CriterionData {
     bandScore: number;
@@ -26,33 +28,26 @@ interface CriteriaAccordionProps {
 
 export default function CriteriaAccordion({ criteria }: CriteriaAccordionProps) {
     
-    const getBadgeVariant = (score: number) => {
-        if (score >= 7) return 'success';
-        if (score >= 5.5) return 'warning';
+    const getBadgeVariant = (score: number): VariantProps<typeof badgeVariants>['variant'] => {
+        if (score >= 7) return 'default'; // Success variant
+        if (score >= 5.5) return 'secondary'; // Warning variant
         return 'destructive';
     };
-
-    const CustomBadge = ({ score } : {score: number}) => {
-        const variant = getBadgeVariant(score);
-        let className = "text-white ";
-        if(variant === 'success') className += 'bg-green-600 hover:bg-green-700';
-        else if(variant === 'warning') className += 'bg-yellow-500 hover:bg-yellow-600';
-        else className += 'bg-red-600 hover:bg-red-700';
-        return <Badge className={className}>{score.toFixed(1)}</Badge>
-    }
 
     return (
         <Accordion type="single" collapsible className="w-full" defaultValue="item-0">
             {criteria.map((item, index) => (
-                <AccordionItem value={`item-${index}`} key={item.title} className="border-b-0">
-                    <AccordionTrigger className="bg-card p-4 rounded-t-lg border border-b-0 hover:no-underline data-[state=open]:rounded-b-none">
+                <AccordionItem value={`item-${index}`} key={item.title} className="border-b-0 mb-4">
+                    <AccordionTrigger className="bg-card p-4 rounded-lg border hover:no-underline data-[state=open]:rounded-b-none">
                         <div className="flex items-center justify-between w-full">
-                            <h3 className="text-lg font-headline font-semibold text-left">{item.title}</h3>
-                            <CustomBadge score={item.data.bandScore} />
+                            <h3 className="text-lg font-semibold text-left">{item.title}</h3>
+                            <Badge variant={getBadgeVariant(item.data.bandScore)}>{item.data.bandScore.toFixed(1)}</Badge>
                         </div>
                     </AccordionTrigger>
                     <AccordionContent className="bg-card p-6 rounded-b-lg border border-t-0 space-y-4">
-                        <p className="text-sm text-muted-foreground italic">"{item.data.justification}"</p>
+                        <blockquote className="border-l-2 pl-4 italic text-muted-foreground">
+                            "{item.data.justification}"
+                        </blockquote>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
                             <div>
@@ -70,7 +65,7 @@ export default function CriteriaAccordion({ criteria }: CriteriaAccordionProps) 
                         </div>
 
                         <div className="pt-4">
-                            <h4 className="flex items-center gap-2 font-semibold text-primary"><ArrowRight className="h-4 w-4" />How to Improve</h4>
+                            <h4 className="flex items-center gap-2 font-semibold text-primary"><Target className="h-4 w-4" />How to Improve</h4>
                             <ul className="mt-2 list-disc list-inside space-y-1 text-sm text-muted-foreground">
                                 {item.data.improvements.map((imp, i) => <li key={i}>{imp}</li>)}
                             </ul>
