@@ -61,10 +61,11 @@ const testimonials = [
 
 export default function Home() {
   const heroImage = placeholderImages.find(p => p.id === "hero-background");
+  const quickStartImage = placeholderImages.find(p => p.id === "quick-start-image");
   
   return (
     <div className="flex flex-col">
-      <section className="relative w-full py-20 md:py-32 lg:py-40">
+      <section className="relative w-full py-24 md:py-32 lg:py-48">
         {heroImage && (
              <Image
              src={heroImage.imageUrl}
@@ -75,36 +76,38 @@ export default function Home() {
              data-ai-hint={heroImage.imageHint}
            />
         )}
-        <div className="absolute inset-0 bg-black/60 -z-10" />
-        <div className="container mx-auto px-4 md:px-6 text-center text-primary-foreground">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-bold">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/40 -z-10" />
+        <div className="container mx-auto px-4 md:px-6 text-center text-white">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-bold drop-shadow-lg">
             Boost Your IELTS Writing Score with AI Feedback
           </h1>
-          <p className="mt-4 max-w-3xl mx-auto text-lg md:text-xl text-primary-foreground/90">
-            Upload your essay and get instant, expert-level analysis based on official criteria.
+          <p className="mt-6 max-w-3xl mx-auto text-lg md:text-xl text-white/90 drop-shadow-sm">
+            Upload your essay and get instant, expert-level analysis based on official criteria—for free.
           </p>
-          <Button asChild size="lg" className="mt-8">
+          <Button asChild size="lg" className="mt-8 shadow-lg hover:shadow-xl transition-shadow">
             <Link href="/assess">Start Free Assessment</Link>
           </Button>
         </div>
       </section>
 
-      <section id="features" className="py-16 md:py-24 bg-background">
+      <section id="features" className="py-16 md:py-24 bg-white">
         <div className="container mx-auto px-4 md:px-6">
-          <h2 className="text-3xl md:text-4xl font-headline font-bold text-center">
-            Why Choose IELTS BandAid?
-          </h2>
-          <p className="mt-4 max-w-2xl mx-auto text-center text-muted-foreground">
-            Our platform is designed to give you the edge you need to succeed.
-          </p>
+          <div className="text-center max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-headline font-bold">
+              Why Choose IELTS BandAid?
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Our platform is meticulously designed to provide you with the critical edge needed to succeed in your IELTS writing exam.
+            </p>
+          </div>
           <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((feature) => (
-              <Card key={feature.title} className="text-center bg-card border hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-                <CardHeader className="items-center">
+              <Card key={feature.title} className="text-center border-t-4 border-t-primary bg-card pt-6 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2">
+                <CardHeader className="items-center p-0">
                   {feature.icon}
                   <CardTitle className="mt-4 font-semibold text-xl">{feature.title}</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-6">
                   <p className="text-muted-foreground">{feature.description}</p>
                 </CardContent>
               </Card>
@@ -115,14 +118,16 @@ export default function Home() {
 
       <section id="how-it-works" className="py-16 md:py-24 bg-muted/50">
         <div className="container mx-auto px-4 md:px-6">
-          <h2 className="text-3xl md:text-4xl font-headline font-bold text-center">
-            How It Works in 3 Simple Steps
-          </h2>
-          <div className="mt-12 max-w-4xl mx-auto grid md:grid-cols-3 gap-8 md:gap-4 relative">
-             <div className="absolute top-8 left-0 w-full h-0.5 bg-border hidden md:block" />
+          <div className="text-center max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-headline font-bold">
+              How It Works in 3 Simple Steps
+            </h2>
+          </div>
+          <div className="mt-12 max-w-5xl mx-auto grid md:grid-cols-3 gap-10 md:gap-4 relative">
+             <div className="absolute top-12 left-0 w-full h-0.5 bg-border hidden md:block" />
              {steps.map((step, index) => (
               <div key={step.step} className="relative flex flex-col items-center text-center p-4">
-                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground font-bold text-2xl z-10 border-4 border-muted/50">
+                <div className="flex items-center justify-center w-24 h-24 rounded-full bg-background shadow-md text-primary font-bold text-4xl font-headline z-10 border-4 border-muted/50">
                   {step.step}
                 </div>
                 <h3 className="mt-6 text-xl font-semibold">{step.title}</h3>
@@ -133,14 +138,56 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="testimonials" className="py-16 md:py-24 bg-background">
+      <section id="quick-start" className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4 md:px-6">
-          <h2 className="text-3xl md:text-4xl font-headline font-bold text-center">
-            Loved by Students Worldwide
-          </h2>
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="order-2 md:order-1">
+              <h2 className="text-3xl md:text-4xl font-headline font-bold">Get Your Feedback in Minutes</h2>
+              <p className="mt-4 text-lg text-muted-foreground">Don't wait for days to get your writing reviewed. Our AI-powered platform gives you instant feedback so you can learn and improve faster.</p>
+              <ul className="mt-6 space-y-4">
+                <li className="flex items-center gap-3">
+                  <CheckCircle className="h-6 w-6 text-green-500" />
+                  <span className="text-lg">Upload typed or handwritten essays.</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle className="h-6 w-6 text-green-500" />
+                  <span className="text-lg">Receive detailed score breakdowns.</span>
+                </li>
+                 <li className="flex items-center gap-3">
+                  <CheckCircle className="h-6 w-6 text-green-500" />
+                  <span className="text-lg">Get actionable steps for improvement.</span>
+                </li>
+              </ul>
+              <Button asChild size="lg" className="mt-8">
+                <Link href="/assess">Try it Now for Free</Link>
+              </Button>
+            </div>
+             <div className="order-1 md:order-2">
+                {quickStartImage && (
+                    <Image
+                      src={quickStartImage.imageUrl}
+                      alt={quickStartImage.description}
+                      width={800}
+                      height={600}
+                      className="rounded-lg shadow-2xl"
+                      data-ai-hint={quickStartImage.imageHint}
+                    />
+                )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="testimonials" className="py-16 md:py-24 bg-muted/50">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="text-center max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-headline font-bold">
+              Loved by Students Worldwide
+            </h2>
+          </div>
           <div className="mt-12 max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
             {testimonials.map((testimonial) => testimonial.image && (
-              <Card key={testimonial.name} className="flex flex-col items-center text-center p-6 bg-muted/30">
+              <Card key={testimonial.name} className="flex flex-col items-center text-center p-8 bg-background shadow-lg">
                 <Image
                   src={testimonial.image.imageUrl}
                   alt={`Testimonial from ${testimonial.name}`}
@@ -149,8 +196,8 @@ export default function Home() {
                   className="rounded-full"
                   data-ai-hint={testimonial.image.imageHint}
                 />
-                <blockquote className="mt-4 text-lg italic text-foreground">"{testimonial.quote}"</blockquote>
-                <cite className="mt-2 font-semibold text-primary not-italic">- {testimonial.name}</cite>
+                <blockquote className="mt-6 text-lg italic text-foreground">"{testimonial.quote}"</blockquote>
+                <cite className="mt-4 font-semibold text-primary not-italic">- {testimonial.name}</cite>
               </Card>
             ))}
           </div>
