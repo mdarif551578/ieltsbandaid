@@ -10,15 +10,13 @@ import { Badge } from '@/components/ui/badge';
 import { ThumbsUp, ThumbsDown, Target, HelpCircle } from 'lucide-react';
 import type { VariantProps } from 'class-variance-authority';
 import { badgeVariants } from '@/components/ui/badge';
-import type { EvaluateIELTSWritingOutput } from '@/ai/flows/evaluate-ielts-writing';
+import type { Criterion } from '@/context/assessment-context';
 
-
-type CriterionData = EvaluateIELTSWritingOutput['taskAchievementResponse'];
 
 interface CriteriaAccordionProps {
     criteria: {
         title: string;
-        data: CriterionData;
+        data: Criterion;
     }[];
 }
 
@@ -37,7 +35,7 @@ export default function CriteriaAccordion({ criteria }: CriteriaAccordionProps) 
                     <AccordionTrigger className="bg-card p-4 rounded-lg border hover:no-underline data-[state=open]:rounded-b-none data-[state=open]:border-b-0 transition-all">
                         <div className="flex items-center justify-between w-full">
                             <h3 className="text-lg font-semibold text-left">{item.title}</h3>
-                            <Badge variant={getBadgeVariant(item.data.bandScore)} className="text-lg px-3 py-1">{item.data.bandScore.toFixed(1)}</Badge>
+                            <Badge variant={getBadgeVariant(item.data.band)} className="text-lg px-3 py-1">{item.data.band.toFixed(1)}</Badge>
                         </div>
                     </AccordionTrigger>
                     <AccordionContent className="bg-card p-6 rounded-b-lg border border-t-0 space-y-6">
@@ -50,13 +48,13 @@ export default function CriteriaAccordion({ criteria }: CriteriaAccordionProps) 
                             <div>
                                 <h4 className="flex items-center gap-2 font-semibold text-green-600 mb-3"><ThumbsUp className="h-5 w-5" />Strengths</h4>
                                 <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
-                                    {item.data.strengths.map((s, i) => <li key={i}>{s}</li>)}
+                                    {item.data.examples.strengths.map((s, i) => <li key={i}>{s}</li>)}
                                 </ul>
                             </div>
                              <div>
                                 <h4 className="flex items-center gap-2 font-semibold text-destructive mb-3"><ThumbsDown className="h-5 w-5" />Weaknesses</h4>
                                 <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
-                                    {item.data.weaknesses.map((w, i) => <li key={i}>{w}</li>)}
+                                    {item.data.examples.weaknesses.map((w, i) => <li key={i}>{w}</li>)}
                                 </ul>
                             </div>
                         </div>

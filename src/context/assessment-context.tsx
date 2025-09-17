@@ -1,15 +1,41 @@
 'use client';
 
-import type { EvaluateIELTSWritingOutput } from '@/ai/flows/evaluate-ielts-writing';
 import { createContext, useContext, useReducer, Dispatch, ReactNode } from 'react';
 
-// We can reuse the output type from the flow
-export type AssessmentResult = EvaluateIELTSWritingOutput & {
-  task?: {
+export type Criterion = {
+  band: number;
+  justification: string;
+  examples: {
+    strengths: string[];
+    weaknesses: string[];
+  };
+  improvements: string[];
+};
+
+export type AssessmentResult = {
+  candidate: {
+    name: string;
+    email: string;
+  };
+  task: {
     type: string;
     question: string;
     word_count: number;
-  }
+  };
+  assessment: {
+    task_achievement_or_response: Criterion;
+    coherence_and_cohesion: Criterion;
+    lexical_resource: Criterion;
+    grammatical_range_and_accuracy: Criterion;
+    overall_band_score: number;
+  };
+  feedback: {
+    overall_strengths: string[];
+    overall_weaknesses: string[];
+    key_recommendations: string[];
+    summary: string;
+  };
+  transcribedAnswer?: string;
 };
 
 

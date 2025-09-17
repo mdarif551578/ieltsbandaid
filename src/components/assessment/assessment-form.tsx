@@ -196,20 +196,18 @@ export default function AssessmentForm() {
       formData.append('name', data.candidateName);
       formData.append('email', data.candidateEmail);
       
-      // Conditionally append question text or images
       if (data.questionInputType === 'text') {
         formData.append('question_text', data.question || '');
-      } else if (data.questionImages) {
+      } else if (data.questionImages && data.questionImages.length > 0) {
         data.questionImages.forEach((uri, index) => {
           const blob = dataURItoBlob(uri);
           formData.append('question_images', blob, `question_image_${index}.png`);
         });
       }
 
-      // Conditionally append answer text or images
       if (data.answerInputType === 'text') {
         formData.append('answer_text', data.answer || '');
-      } else if (data.answerImages) {
+      } else if (data.answerImages && data.answerImages.length > 0) {
         data.answerImages.forEach((uri, index) => {
           const blob = dataURItoBlob(uri);
           formData.append('answer_images', blob, `answer_image_${index}.png`);
@@ -234,27 +232,16 @@ export default function AssessmentForm() {
             // @ts-ignore
             throw new Error(resultData.error);
         }
-        
-        const finalResult = { ...resultData };
 
-        if (!finalResult.task) {
-          finalResult.task = { type: data.taskType, question: '', word_count: 0 };
-        }
-        if (data.questionInputType === 'text' && data.question) {
-          finalResult.task.question = data.question;
-        } else {
-          finalResult.task.question = resultData.task?.question || 'Question provided as image';
-        }
+        const finalResult = {
+          ...resultData,
+          task: {
+            ...resultData.task,
+            question: data.questionInputType === 'text' ? data.question : "Question provided as image.",
+          },
+          transcribedAnswer: data.answerInputType === 'text' ? data.answer : resultData.transcribedAnswer
+        } as AssessmentResult;
 
-        if (data.answerInputType === 'text' && data.answer) {
-          finalResult.task.word_count = data.answer.split(/\s+/).filter(Boolean).length;
-        } else {
-           finalResult.task.word_count = resultData.task?.word_count || 0;
-        }
-
-        if (!finalResult.transcribedAnswer) {
-          finalResult.transcribedAnswer = data.answerInputType === 'text' ? (data.answer || '') : (resultData.transcribedAnswer || 'Answer provided as image');
-        }
 
         dispatch({ type: 'SET_RESULT', payload: finalResult });
         localStorage.setItem('assessmentResult', JSON.stringify(finalResult));

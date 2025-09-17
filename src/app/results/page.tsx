@@ -93,22 +93,39 @@ export default function ResultsPage() {
   }
   
   const {
-    overallBandScore,
-    cefrLevel,
-    taskAchievementResponse,
-    coherenceAndCohesion,
-    lexicalResource,
-    grammaticalRangeAndAccuracy,
-    overallStrengths,
-    overallWeaknesses,
-    keyRecommendations,
+    assessment,
+    feedback,
+    task,
     transcribedAnswer,
   } = state.result;
 
-  const wordCount = transcribedAnswer.split(/\s+/).filter(Boolean).length;
-  const questionText = state.result.task?.question || "Question provided as image";
-  const taskType = state.result.task?.type || "N/A";
+  if (!assessment || !feedback || !task) {
+    // Handle case where the structure is not as expected.
+    router.replace('/assess');
+    return null;
+  }
+  
+  const { 
+      overall_band_score: overallBandScore,
+      task_achievement_or_response: taskAchievementResponse,
+      coherence_and_cohesion: coherenceAndCohesion,
+      lexical_resource: lexicalResource,
+      grammatical_range_and_accuracy: grammaticalRangeAndAccuracy,
+   } = assessment;
 
+   const {
+      overall_strengths: overallStrengths,
+      overall_weaknesses: overallWeaknesses,
+      key_recommendations: keyRecommendations,
+      summary,
+   } = feedback;
+
+
+  const wordCount = transcribedAnswer ? transcribedAnswer.split(/\s+/).filter(Boolean).length : task.word_count;
+  const questionText = task?.question || "Question provided as image";
+  const taskType = task?.type || "N/A";
+
+  const cefrLevel = summary.match(/CEFR (\w+)/)?.[1] || 'N/A';
 
   const criteria = [
     { title: 'Task Achievement / Response', data: taskAchievementResponse },
@@ -133,7 +150,7 @@ export default function ResultsPage() {
 
         <main className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
-                <ScoreOverview score={overallBandScore} cefr={cefrLevel} summary={"The AI-generated summary of your performance will appear here."}/>
+                <ScoreOverview score={overallBandScore} cefr={cefrLevel} summary={summary}/>
                 
                 <section>
                     <h2 className="text-2xl font-headline font-bold mb-4">Criteria Breakdown</h2>
@@ -194,7 +211,7 @@ export default function ResultsPage() {
                            <h4 className="font-semibold !text-foreground !mb-2">Question:</h4>
                            <p className="whitespace-pre-wrap">{questionText}</p>
                            <h4 className="font-semibold !text-foreground !mt-4 !mb-2">Your Answer:</h4>
-                           <p className="whitespace-pre-wrap">{transcribedAnswer}</p>
+                           <p className="whitespace-pre-wrap">{transcribedAnswer || ''}</p>
                         </div>
                     </CardContent>
                 </Card>
