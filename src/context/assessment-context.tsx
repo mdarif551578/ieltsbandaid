@@ -1,65 +1,16 @@
 'use client';
 
+import type { EvaluateIELTSWritingOutput } from '@/ai/flows/evaluate-ielts-writing';
 import { createContext, useContext, useReducer, Dispatch, ReactNode } from 'react';
 
-export interface AssessmentResult {
-  candidate: {
-    name: string;
-    email: string;
-  };
-  task: {
+// We can reuse the output type from the flow
+export type AssessmentResult = EvaluateIELTSWritingOutput & {
+  task?: {
     type: string;
     question: string;
     word_count: number;
-  };
-  assessment: {
-    task_achievement_or_response: {
-      band: number;
-      justification: string;
-      examples: {
-        strengths: string[];
-        weaknesses: string[];
-      };
-      improvements: string[];
-    };
-    coherence_and_cohesion: {
-      band: number;
-      justification: string;
-      examples: {
-        strengths: string[];
-        weaknesses: string[];
-      };
-      improvements: string[];
-    };
-    lexical_resource: {
-      band: number;
-      justification: string;
-      examples: {
-        strengths: string[];
-        weaknesses: string[];
-      };
-      improvements: string[];
-    };
-    grammatical_range_and_accuracy: {
-      band: number;
-      justification: string;
-      examples: {
-        strengths: string[];
-        weaknesses: string[];
-      };
-      improvements: string[];
-    };
-    overall_band_score: number;
-  };
-  feedback: {
-    overall_strengths: string[];
-    overall_weaknesses: string[];
-    key_recommendations: string[];
-    summary: string;
-  };
-  transcribedAnswer: string;
-  cefrLevel: string;
-}
+  }
+};
 
 
 type State = {

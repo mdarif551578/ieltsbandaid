@@ -24,22 +24,22 @@ export default function ResultsPage() {
       timer = setInterval(() => {
         setElapsedTime(prevTime => prevTime + 1);
       }, 1000);
-    } else {
-      setElapsedTime(0);
     }
     
-    // Redirect if there's no result and it's not loading.
+    // On mount, check for result in context or redirect.
+    // Give a slight delay to allow context to populate from local storage.
     const redirectTimer = setTimeout(() => {
-      if (!state.isLoading && !state.result && !state.error) {
-        router.replace('/assess');
-      }
+        if (!state.isLoading && !state.result) {
+            router.replace('/assess');
+        }
     }, 500);
+
 
     return () => {
       clearTimeout(redirectTimer);
-      clearInterval(timer);
+      if(timer) clearInterval(timer);
     };
-  }, [state.isLoading, state.result, state.error, router]);
+  }, [state.isLoading, state.result, router]);
   
   const handlePrint = () => {
     // Temporarily add a class to expand accordions for printing
@@ -82,22 +82,39 @@ export default function ResultsPage() {
   }
 
   if (!state.result) {
-    return null; // Should be redirected
+    // This state should ideally not be visible as the useEffect will redirect.
+    // It acts as a fallback.
+    return (
+         <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mb-6" />
+            <p className="text-muted-foreground">Loading results...</p>
+        </div>
+    );
   }
-
+  
   const {
-    assessment,
-    feedback,
-    task,
-    transcribedAnswer,
+    overallBandScore,
     cefrLevel,
+    taskAchievementResponse,
+    coherenceAndCohesion,
+    lexicalResource,
+    grammaticalRangeAndAccuracy,
+    overallStrengths,
+    overallWeaknesses,
+    keyRecommendations,
+    transcribedAnswer,
   } = state.result;
 
+  const wordCount = transcribedAnswer.split(/\s+/).filter(Boolean).length;
+  const questionText = state.result.task?.question || "Question provided as image";
+  const taskType = state.result.task?.type || "N/A";
+
+
   const criteria = [
-    { title: 'Task Achievement / Response', data: assessment.task_achievement_or_response },
-    { title: 'Coherence and Cohesion', data: assessment.coherence_and_cohesion },
-    { title: 'Lexical Resource', data: assessment.lexical_resource },
-    { title: 'Grammatical Range and Accuracy', data: assessment.grammatical_range_and_accuracy },
+    { title: 'Task Achievement / Response', data: taskAchievementResponse },
+    { title: 'Coherence and Cohesion', data: coherenceAndCohesion },
+    { title: 'Lexical Resource', data: lexicalResource },
+    { title: 'Grammatical Range and Accuracy', data: grammaticalRangeAndAccuracy },
   ];
   
   return (
@@ -116,7 +133,7 @@ export default function ResultsPage() {
 
         <main className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
-                <ScoreOverview score={assessment.overall_band_score} cefr={cefrLevel} summary={feedback.summary}/>
+                <ScoreOverview score={overallBandScore} cefr={cefrLevel} summary={"The AI-generated summary of your performance will appear here."}/>
                 
                 <section>
                     <h2 className="text-2xl font-headline font-bold mb-4">Criteria Breakdown</h2>
@@ -131,21 +148,21 @@ export default function ResultsPage() {
                         <div>
                             <h3 className="text-lg font-semibold text-green-600">Overall Strengths</h3>
                             <ul className="mt-2 list-disc list-inside space-y-2 text-muted-foreground">
-                                {feedback.overall_strengths.map((item, i) => <li key={i}>{item}</li>)}
+                                {overallStrengths.map((item, i) => <li key={i}>{item}</li>)}
                             </ul>
                         </div>
                         <Separator />
                          <div>
                             <h3 className="text-lg font-semibold text-destructive">Overall Weaknesses</h3>
                             <ul className="mt-2 list-disc list-inside space-y-2 text-muted-foreground">
-                                {feedback.overall_weaknesses.map((item, i) => <li key={i}>{item}</li>)}
+                                {overallWeaknesses.map((item, i) => <li key={i}>{item}</li>)}
                             </ul>
                         </div>
                         <Separator />
                         <div>
                             <h3 className="text-lg font-semibold text-primary">Key Recommendations</h3>
                             <ul className="mt-2 list-disc list-inside space-y-2 text-muted-foreground">
-                                {feedback.key_recommendations.map((item, i) => <li key={i}>{item}</li>)}
+                                {keyRecommendations.map((item, i) => <li key={i}>{item}</li>)}
                             </ul>
                         </div>
                     </CardContent>
@@ -160,11 +177,11 @@ export default function ResultsPage() {
                     <CardContent className="space-y-4">
                         <div>
                            <h4 className="font-semibold text-sm mb-1 text-muted-foreground">Task Type</h4>
-                           <Badge variant="secondary">{task.type}</Badge>
+                           <Badge variant="secondary">{taskType}</Badge>
                         </div>
                         <div>
                            <h4 className="font-semibold text-sm mb-1 text-muted-foreground">Word Count</h4>
-                           <Badge variant="secondary">{task.word_count} words</Badge>
+                           <Badge variant="secondary">{wordCount} words</Badge>
                         </div>
                     </CardContent>
                 </Card>
@@ -175,7 +192,7 @@ export default function ResultsPage() {
                     <CardContent className="space-y-4 max-h-[40rem] overflow-y-auto">
                         <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground p-3 bg-muted/50 rounded-md">
                            <h4 className="font-semibold !text-foreground !mb-2">Question:</h4>
-                           <p className="whitespace-pre-wrap">{task.question}</p>
+                           <p className="whitespace-pre-wrap">{questionText}</p>
                            <h4 className="font-semibold !text-foreground !mt-4 !mb-2">Your Answer:</h4>
                            <p className="whitespace-pre-wrap">{transcribedAnswer}</p>
                         </div>

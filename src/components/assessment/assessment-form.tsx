@@ -113,6 +113,20 @@ export default function AssessmentForm() {
     mode: 'onBlur'
   });
 
+   useEffect(() => {
+    // Attempt to load result from local storage on component mount
+    const savedResult = localStorage.getItem('assessmentResult');
+    if (savedResult) {
+      try {
+        const result: AssessmentResult = JSON.parse(savedResult);
+        dispatch({ type: 'SET_RESULT', payload: result });
+      } catch (error) {
+        console.error("Failed to parse saved assessment result:", error);
+        localStorage.removeItem('assessmentResult');
+      }
+    }
+  }, [dispatch]);
+
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     fieldName: 'questionImages' | 'answerImages',
