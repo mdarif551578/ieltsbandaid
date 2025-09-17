@@ -1,13 +1,15 @@
 import AssessmentForm from '@/components/assessment/assessment-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Lightbulb, BookCheck, Camera, Type } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export default function AssessPage() {
   return (
-    <div className="container mx-auto max-w-6xl py-8 md:py-12">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="container mx-auto max-w-7xl py-8 md:py-12">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 xl:gap-12">
         <div className="lg:col-span-2">
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">
+            <h1 className="text-3xl md:text-4xl font-bold font-headline mb-2">
                 Submit Your Writing Task
             </h1>
             <p className="text-muted-foreground mb-8">
@@ -44,7 +46,7 @@ export default function AssessPage() {
                     </ul>
                 </CardContent>
             </Card>
-            <Card className="bg-secondary/10 border-secondary">
+            <Card className="bg-primary/5 border-primary/20">
                 <CardHeader>
                     <CardTitle>Sample Uploads</CardTitle>
                 </CardHeader>
@@ -52,9 +54,9 @@ export default function AssessPage() {
                     <p className="text-sm text-muted-foreground mb-4">
                         Not sure what to upload? Download our sample files to see how it works.
                     </p>
-                    <div className="flex gap-2">
-                        <button className="text-sm text-primary hover:underline">Sample Question.jpg</button>
-                        <button className="text-sm text-primary hover:underline">Sample Answer.jpg</button>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        <Button variant="link" className="p-0 h-auto justify-start">Sample Question.jpg</Button>
+                        <Button variant="link" className="p-0 h-auto justify-start">Sample Answer.jpg</Button>
                     </div>
                 </CardContent>
             </Card>

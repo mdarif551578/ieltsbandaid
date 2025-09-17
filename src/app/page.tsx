@@ -102,7 +102,7 @@ export default function Home() {
               <Card key={feature.title} className="text-center bg-card border hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                 <CardHeader className="items-center">
                   {feature.icon}
-                  <CardTitle className="mt-4 font-semibold">{feature.title}</CardTitle>
+                  <CardTitle className="mt-4 font-semibold text-xl">{feature.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">{feature.description}</p>
@@ -121,7 +121,7 @@ export default function Home() {
           <div className="mt-12 max-w-4xl mx-auto grid md:grid-cols-3 gap-8 md:gap-4 relative">
              <div className="absolute top-8 left-0 w-full h-0.5 bg-border hidden md:block" />
              {steps.map((step, index) => (
-              <div key={step.step} className="relative flex flex-col items-center text-center">
+              <div key={step.step} className="relative flex flex-col items-center text-center p-4">
                 <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground font-bold text-2xl z-10 border-4 border-muted/50">
                   {step.step}
                 </div>

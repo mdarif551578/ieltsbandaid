@@ -26,22 +26,24 @@ export default function Header() {
           <GraduationCap className="h-6 w-6 text-primary" />
           <span className="font-bold font-headline text-lg hidden sm:inline-block">IELTS BandAid</span>
         </Link>
-        <nav className="hidden items-center space-x-6 text-sm font-medium md:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                'transition-colors hover:text-primary',
-                pathname === link.href ? 'text-foreground font-semibold' : 'text-muted-foreground'
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        <div className="flex-1 md:flex-none">
+            <nav className="hidden items-center space-x-6 text-sm font-medium md:flex">
+            {navLinks.map((link) => (
+                <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                    'transition-colors hover:text-primary',
+                    pathname === link.href ? 'text-foreground font-semibold' : 'text-muted-foreground'
+                )}
+                >
+                {link.label}
+                </Link>
+            ))}
+            </nav>
+        </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
-          <Button asChild className="hidden md:inline-flex">
+          <Button asChild>
             <Link href="/assess">Start Assessment</Link>
           </Button>
           <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
@@ -52,7 +54,7 @@ export default function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left">
-              <Link href="/" className="mr-6 flex items-center space-x-2 mb-6">
+              <Link href="/" className="mr-6 flex items-center space-x-2 mb-6" onClick={() => setSheetOpen(false)}>
                 <GraduationCap className="h-6 w-6 text-primary" />
                 <span className="font-bold font-headline">IELTS BandAid</span>
               </Link>
@@ -70,9 +72,6 @@ export default function Header() {
                     {link.label}
                   </Link>
                 ))}
-                <Button asChild className="mt-4" onClick={() => setSheetOpen(false)}>
-                  <Link href="/assess">Start Assessment</Link>
-                </Button>
               </div>
             </SheetContent>
           </Sheet>

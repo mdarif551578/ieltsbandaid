@@ -5,18 +5,18 @@ export default function Footer() {
   return (
     <footer className="border-t bg-background">
       <div className="container mx-auto px-4 md:px-6 py-8">
-        <div className="flex flex-col md:flex-row items-center justify-between">
-          <div className="flex items-center space-x-2 mb-4 md:mb-0">
+        <div className="grid md:grid-cols-3 gap-8 items-center">
+          <div className="flex items-center space-x-2 justify-center md:justify-start">
             <GraduationCap className="h-6 w-6 text-primary" />
             <span className="font-bold font-headline text-lg">IELTS BandAid</span>
           </div>
-          <nav className="flex flex-wrap justify-center gap-x-4 gap-y-2 md:gap-6 text-sm text-muted-foreground mb-4 md:mb-0">
+          <nav className="flex flex-wrap justify-center gap-x-4 gap-y-2 md:gap-6 text-sm text-muted-foreground">
             <Link href="/how-it-works" className="hover:text-primary transition-colors">How It Works</Link>
             <Link href="/about" className="hover:text-primary transition-colors">About</Link>
             <Link href="/contact" className="hover:text-primary transition-colors">Contact</Link>
             <Link href="/privacy-policy" className="hover:text-primary transition-colors">Privacy Policy</Link>
           </nav>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center justify-center md:justify-end space-x-4">
             <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
               <Twitter className="h-5 w-5" />
             </Link>
