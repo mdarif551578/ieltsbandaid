@@ -1,3 +1,23 @@
+
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-background",
+      "description": "A focused student writing in a notebook in a well-lit library.",
+      "imageUrl": "https://picsum.photos/seed/hero/1920/1080",
+      "imageHint": "student writing"
+    },
+    {
+      "id": "testimonial-1",
+      "description": "Headshot of a smiling young woman.",
+      "imageUrl": "https://picsum.photos/seed/person1/100/100",
+      "imageHint": "woman smiling"
+    },
+    {
+      "id": "testimonial-2",
+      "description": "Headshot of a smiling young man.",
+      "imageUrl": "https://picsum.photos/seed/person2/100/100",
+      "imageHint": "man smiling"
+    }
+  ]
 }
