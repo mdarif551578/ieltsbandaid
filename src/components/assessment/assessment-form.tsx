@@ -19,7 +19,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAssessment } from '@/context/assessment-context';
 import { useRouter } from 'next/navigation';
-import { useTransition, useState, useId, useEffect } from 'react';
+import { useTransition, useState, useId } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, PlusCircle, X } from 'lucide-react';
 import Image from 'next/image';
@@ -113,20 +113,6 @@ export default function AssessmentForm() {
     mode: 'onBlur'
   });
 
-   useEffect(() => {
-    // Attempt to load result from local storage on component mount
-    const savedResult = localStorage.getItem('assessmentResult');
-    if (savedResult) {
-      try {
-        const result: AssessmentResult = JSON.parse(savedResult);
-        dispatch({ type: 'SET_RESULT', payload: result });
-      } catch (error) {
-        console.error("Failed to parse saved assessment result:", error);
-        localStorage.removeItem('assessmentResult');
-      }
-    }
-  }, [dispatch]);
-
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     fieldName: 'questionImages' | 'answerImages',
@@ -157,7 +143,7 @@ export default function AssessmentForm() {
           form.setError(fieldName, { message: 'Failed to read file.' });
           reject(new Error('Failed to read file'));
         };
-        reader.readDataURL(file);
+        reader.readAsDataURL(file);
       });
     });
 
@@ -193,29 +179,22 @@ export default function AssessmentForm() {
       
       const formData = new FormData();
       formData.append('task_type', data.taskType);
-      
-      if (data.candidateName) {
-        formData.append('name', data.candidateName);
-      }
-      if (data.candidateEmail) {
-        formData.append('email', data.candidateEmail);
-      }
+      formData.append('name', data.candidateName);
+      formData.append('email', data.candidateEmail);
       
       if (data.questionInputType === 'text') {
         formData.append('question_text', data.question || '');
-      } else if (data.questionInputType === 'image' && data.questionImages && data.questionImages.length > 0) {
-        data.questionImages.forEach((uri, index) => {
-          const blob = dataURItoBlob(uri);
-          formData.append('question_images', blob, `question_image_${index}.png`);
+      } else if (data.questionInputType === 'image' && data.questionImages) {
+        data.questionImages.forEach((uri) => {
+          formData.append('question_images', dataURItoBlob(uri));
         });
       }
 
       if (data.answerInputType === 'text') {
         formData.append('answer_text', data.answer || '');
-      } else if (data.answerInputType === 'image' && data.answerImages && data.answerImages.length > 0) {
-        data.answerImages.forEach((uri, index) => {
-          const blob = dataURItoBlob(uri);
-          formData.append('answer_images', blob, `answer_image_${index}.png`);
+      } else if (data.answerInputType === 'image' && data.answerImages) {
+        data.answerImages.forEach((uri) => {
+          formData.append('answer_images', dataURItoBlob(uri));
         });
       }
 
@@ -234,6 +213,8 @@ export default function AssessmentForm() {
                 errorMessage = resultData.detail;
               } else if (Array.isArray(resultData.detail)) {
                 errorMessage = resultData.detail.map((err: any) => `${err.loc.join(' -> ')}: ${err.msg}`).join('; ');
+              } else {
+                 errorMessage = JSON.stringify(resultData.detail);
               }
             } else if (resultData.error) {
               errorMessage = resultData.error;
@@ -264,7 +245,6 @@ export default function AssessmentForm() {
           description: errorMessage,
           variant: 'destructive',
         });
-      } finally {
         dispatch({ type: 'SET_LOADING', payload: false });
       }
     });
@@ -498,7 +478,3 @@ export default function AssessmentForm() {
     </Form>
   );
 }
-
-    
-
-    

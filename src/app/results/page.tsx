@@ -12,9 +12,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import type { AssessmentResult } from '@/context/assessment-context';
 
 export default function ResultsPage() {
-  const { state } = useAssessment();
+  const { state, dispatch } = useAssessment();
   const router = useRouter();
   const [elapsedTime, setElapsedTime] = useState(0);
 
@@ -26,20 +27,32 @@ export default function ResultsPage() {
       }, 1000);
     }
     
-    // On mount, check for result in context or redirect.
-    // Give a slight delay to allow context to populate from local storage.
-    const redirectTimer = setTimeout(() => {
-        if (!state.isLoading && !state.result) {
-            router.replace('/assess');
+    if (!state.result && !state.isLoading) {
+        const savedResult = localStorage.getItem('assessmentResult');
+        if (savedResult) {
+            try {
+                const result: AssessmentResult = JSON.parse(savedResult);
+                dispatch({ type: 'SET_RESULT', payload: result });
+            } catch (error) {
+                console.error("Failed to parse saved assessment result:", error);
+                localStorage.removeItem('assessmentResult');
+                router.replace('/assess');
+            }
+        } else {
+            const redirectTimer = setTimeout(() => {
+                if (!state.isLoading && !state.result) {
+                    router.replace('/assess');
+                }
+            }, 500);
+            return () => clearTimeout(redirectTimer);
         }
-    }, 500);
+    }
 
 
     return () => {
-      clearTimeout(redirectTimer);
       if(timer) clearInterval(timer);
     };
-  }, [state.isLoading, state.result, router]);
+  }, [state.isLoading, state.result, router, dispatch]);
   
   const handlePrint = () => {
     // Temporarily add a class to expand accordions for printing
@@ -82,8 +95,6 @@ export default function ResultsPage() {
   }
 
   if (!state.result) {
-    // This state should ideally not be visible as the useEffect will redirect.
-    // It acts as a fallback.
     return (
          <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] text-center">
             <Loader2 className="h-12 w-12 animate-spin text-primary mb-6" />
@@ -100,9 +111,19 @@ export default function ResultsPage() {
   } = state.result;
 
   if (!assessment || !feedback || !task) {
-    // Handle case where the structure is not as expected.
-    router.replace('/assess');
-    return null;
+    return (
+        <div className="container mx-auto max-w-2xl py-20">
+            <Alert variant="destructive" className="text-center">
+                <AlertTitle className="text-2xl font-bold">Invalid Result Format</AlertTitle>
+                <AlertDescription className="mt-4">
+                   <p className="mb-6 text-base">The assessment result is missing required data.</p>
+                   <Button asChild>
+                        <Link href="/assess">Try Again</Link>
+                   </Button>
+                </AlertDescription>
+            </Alert>
+        </div>
+    )
   }
   
   const { 
