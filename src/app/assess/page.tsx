@@ -54,10 +54,10 @@ export default function AssessPage() {
                     <p className="text-sm text-muted-foreground mb-4">
                         Not sure what to upload? Download our sample files to see how it works.
                     </p>
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                         <div>
                             <p className="text-sm font-semibold mb-2">Sample Questions:</p>
-                            <div className="flex flex-col sm:flex-row gap-2">
+                            <div className="flex flex-col gap-2">
                                 <Button variant="link" asChild className="p-0 h-auto justify-start">
                                     <a href="/sample-question.jpg" download>
                                        <Download className="mr-2 h-4 w-4" />
@@ -74,7 +74,7 @@ export default function AssessPage() {
                         </div>
                          <div>
                             <p className="text-sm font-semibold mb-2">Sample Answers:</p>
-                            <div className="flex flex-col sm:flex-row gap-2">
+                            <div className="flex flex-col gap-2">
                                 <Button variant="link" asChild className="p-0 h-auto justify-start">
                                     <a href="/sample-answer.jpg" download>
                                        <Download className="mr-2 h-4 w-4" />
