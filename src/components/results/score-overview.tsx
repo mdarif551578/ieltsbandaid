@@ -11,18 +11,18 @@ interface ScoreOverviewProps {
 
 export default function ScoreOverview({ score, cefr, summary }: ScoreOverviewProps) {
     const getScoreColor = (band: number) => {
-        if (band >= 7.0) return 'text-green-600';
+        if (band >= 7.0) return 'text-green-500';
         if (band >= 5.5) return 'text-yellow-500';
-        return 'text-red-600';
+        return 'text-red-500';
     };
 
     const colorClass = getScoreColor(score);
     const progressValue = (score / 9) * 100;
 
     return (
-        <Card>
-            <CardContent className="p-6 grid md:grid-cols-3 gap-6">
-                <div className="flex flex-col items-center justify-center text-center">
+        <Card className="overflow-hidden">
+            <CardContent className="p-6 grid md:grid-cols-3 gap-6 items-center">
+                <div className="flex flex-col items-center justify-center text-center row-span-1 md:row-auto border-b md:border-b-0 md:border-r pb-6 md:pb-0 md:pr-6">
                     <RadialProgress progress={progressValue} score={score} colorClass={colorClass} />
                      <div className="mt-4">
                         <p className="text-sm text-muted-foreground">CEFR Level</p>
@@ -30,8 +30,8 @@ export default function ScoreOverview({ score, cefr, summary }: ScoreOverviewPro
                     </div>
                 </div>
                 <div className="md:col-span-2">
-                    <h2 className="text-2xl font-bold">Overall Band Score & Summary</h2>
-                    <p className="mt-2 text-muted-foreground">
+                    <h2 className="text-xl font-headline font-bold">Overall Band Score & Summary</h2>
+                    <p className="mt-4 text-muted-foreground leading-relaxed">
                         {summary}
                     </p>
                 </div>

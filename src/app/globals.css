@@ -70,3 +70,26 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
+
+@layer utilities {
+    @media print {
+        .print-expand-all [data-state="closed"] {
+            display: block;
+        }
+        .print-expand-all [data-state="closed"] > div {
+             height: auto !important;
+             opacity: 1 !important;
+             visibility: visible !important;
+        }
+         .print-expand-all [data-radix-accordion-content-wrapper] {
+            display: block !important;
+            height: auto !important;
+         }
+         .print-expand-all [data-radix-accordion-trigger] > svg {
+            display: none;
+         }
+        .print-hidden {
+            display: none;
+        }
+    }
+}

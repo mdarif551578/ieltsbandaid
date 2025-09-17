@@ -7,7 +7,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { ThumbsUp, ThumbsDown, Target } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Target, HelpCircle } from 'lucide-react';
 import type { VariantProps } from 'class-variance-authority';
 import { badgeVariants } from '@/components/ui/badge';
 import { AssessmentResult } from '@/context/assessment-context';
@@ -30,38 +30,39 @@ export default function CriteriaAccordion({ criteria }: CriteriaAccordionProps) 
     };
 
     return (
-        <Accordion type="single" collapsible className="w-full" defaultValue="item-0">
+        <Accordion type="single" collapsible className="w-full space-y-4" defaultValue="item-0">
             {criteria.map((item, index) => (
-                <AccordionItem value={`item-${index}`} key={item.title} className="border-b-0 mb-4">
-                    <AccordionTrigger className="bg-card p-4 rounded-lg border hover:no-underline data-[state=open]:rounded-b-none">
+                <AccordionItem value={`item-${index}`} key={item.title} className="border-b-0">
+                    <AccordionTrigger className="bg-card p-4 rounded-lg border hover:no-underline data-[state=open]:rounded-b-none data-[state=open]:border-b-0 transition-all">
                         <div className="flex items-center justify-between w-full">
                             <h3 className="text-lg font-semibold text-left">{item.title}</h3>
-                            <Badge variant={getBadgeVariant(item.data.band)}>{item.data.band.toFixed(1)}</Badge>
+                            <Badge variant={getBadgeVariant(item.data.band)} className="text-lg px-3 py-1">{item.data.band.toFixed(1)}</Badge>
                         </div>
                     </AccordionTrigger>
-                    <AccordionContent className="bg-card p-6 rounded-b-lg border border-t-0 space-y-4">
-                        <blockquote className="border-l-2 pl-4 italic text-muted-foreground">
+                    <AccordionContent className="bg-card p-6 rounded-b-lg border border-t-0 space-y-6">
+                        <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground relative">
+                            <HelpCircle className="absolute -left-3 -top-2 h-5 w-5 text-primary/80" />
                             "{item.data.justification}"
                         </blockquote>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
                             <div>
-                                <h4 className="flex items-center gap-2 font-semibold text-green-600"><ThumbsUp className="h-4 w-4" />Strengths</h4>
-                                <ul className="mt-2 list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                                <h4 className="flex items-center gap-2 font-semibold text-green-600 mb-3"><ThumbsUp className="h-5 w-5" />Strengths</h4>
+                                <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
                                     {item.data.examples.strengths.map((s, i) => <li key={i}>{s}</li>)}
                                 </ul>
                             </div>
                              <div>
-                                <h4 className="flex items-center gap-2 font-semibold text-red-600"><ThumbsDown className="h-4 w-4" />Weaknesses</h4>
-                                <ul className="mt-2 list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                                <h4 className="flex items-center gap-2 font-semibold text-destructive mb-3"><ThumbsDown className="h-5 w-5" />Weaknesses</h4>
+                                <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
                                     {item.data.examples.weaknesses.map((w, i) => <li key={i}>{w}</li>)}
                                 </ul>
                             </div>
                         </div>
 
                         <div className="pt-4">
-                            <h4 className="flex items-center gap-2 font-semibold text-primary"><Target className="h-4 w-4" />How to Improve</h4>
-                            <ul className="mt-2 list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                            <h4 className="flex items-center gap-2 font-semibold text-primary mb-3"><Target className="h-5 w-5" />How to Improve</h4>
+                            <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
                                 {item.data.improvements.map((imp, i) => <li key={i}>{imp}</li>)}
                             </ul>
                         </div>
