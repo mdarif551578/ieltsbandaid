@@ -2,44 +2,63 @@
 
 import { createContext, useContext, useReducer, Dispatch, ReactNode } from 'react';
 
-// This will be the shape of our AI's evaluation result
 export interface AssessmentResult {
-  overallBandScore: number;
-  cefrLevel: string;
-  taskAchievementResponse: {
-    bandScore: number;
-    justification: string;
-    strengths: string[];
-    weaknesses: string[];
-    improvements: string[];
+  candidate: {
+    name: string;
+    email: string;
   };
-  coherenceAndCohesion: {
-    bandScore: number;
-    justification: string;
-    strengths: string[];
-    weaknesses: string[];
-    improvements: string[];
+  task: {
+    type: string;
+    question: string;
+    word_count: number;
   };
-  lexicalResource: {
-    bandScore: number;
-    justification: string;
-    strengths: string[];
-    weaknesses: string[];
-    improvements: string[];
+  assessment: {
+    task_achievement_or_response: {
+      band: number;
+      justification: string;
+      examples: {
+        strengths: string[];
+        weaknesses: string[];
+      };
+      improvements: string[];
+    };
+    coherence_and_cohesion: {
+      band: number;
+      justification: string;
+      examples: {
+        strengths: string[];
+        weaknesses: string[];
+      };
+      improvements: string[];
+    };
+    lexical_resource: {
+      band: number;
+      justification: string;
+      examples: {
+        strengths: string[];
+        weaknesses: string[];
+      };
+      improvements: string[];
+    };
+    grammatical_range_and_accuracy: {
+      band: number;
+      justification: string;
+      examples: {
+        strengths: string[];
+        weaknesses: string[];
+      };
+      improvements: string[];
+    };
+    overall_band_score: number;
   };
-  grammaticalRangeAndAccuracy: {
-    bandScore: number;
-    justification: string;
-    strengths: string[];
-    weaknesses: string[];
-    improvements: string[];
+  feedback: {
+    overall_strengths: string[];
+    overall_weaknesses: string[];
+    key_recommendations: string[];
+    summary: string;
   };
-  overallStrengths: string[];
-  overallWeaknesses: string[];
-  keyRecommendations: string[];
   transcribedAnswer: string;
-  question: string;
-  taskType: string;
+  cefrLevel: string;
 }
 
 
@@ -68,7 +87,7 @@ const AssessmentContext = createContext<{
 function assessmentReducer(state: State, action: Action): State {
   switch (action.type) {
     case 'SET_LOADING':
-      return { ...state, isLoading: action.payload, error: null };
+      return { ...state, isLoading: action.payload, error: null, result: null };
     case 'SET_RESULT':
       return { ...state, result: action.payload, isLoading: false, error: null };
     case 'SET_ERROR':

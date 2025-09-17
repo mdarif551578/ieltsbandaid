@@ -1,5 +1,7 @@
 'use server';
 
+import {transcribeImageToText} from '@/ai/flows/transcribe-image-to-text';
+import {evaluateIELTSWriting} from '@/ai/flows/evaluate-ielts-writing';
 import { z } from 'zod';
 import { AssessmentResult } from '@/context/assessment-context';
 
@@ -19,44 +21,6 @@ type ActionResult =
     | { success: true; data: AssessmentResult }
     | { success: false; error: string };
 
-const MOCK_EVALUATION_DATA: AssessmentResult = {
-  overallBandScore: 7.5,
-  cefrLevel: 'C1',
-  taskAchievementResponse: {
-    bandScore: 7.0,
-    justification: "The response addresses all parts of the task and presents a clear position throughout. The main ideas are relevant and well-supported with examples.",
-    strengths: ["Effectively addresses all parts of the prompt.", "Presents a clear and consistent argument."],
-    weaknesses: ["Some supporting details could be further developed.", "The conclusion could be slightly stronger."],
-    improvements: ["Expand on your examples with more specific details.", "Consider rephrasing the conclusion to be more impactful."],
-  },
-  coherenceAndCohesion: {
-    bandScore: 8.0,
-    justification: "The essay is well-organized with clear paragraphing. Cohesive devices are used effectively and appropriately, and there is a clear overall progression.",
-    strengths: ["Logical paragraphing, with each paragraph having a clear central topic.", "Good use of a range of cohesive devices (e.g., 'Furthermore,' 'In contrast')."],
-    weaknesses: ["Occasionally, sentence-level linking could be smoother."],
-    improvements: ["Vary your sentence starters to improve flow.", "Review the use of pronouns to ensure clear referencing."],
-  },
-  lexicalResource: {
-    bandScore: 7.5,
-    justification: "The candidate uses a wide range of vocabulary with some sophistication. There are occasional errors in word choice, but meaning is rarely obscured.",
-    strengths: ["Uses less common vocabulary accurately (e.g., 'ubiquitous', 'detrimental').", "Shows good awareness of collocation."],
-    weaknesses: ["Minor errors in word formation (e.g., 'benefitial' instead of 'beneficial').", "Slightly repetitive use of some vocabulary."],
-    improvements: ["Use a thesaurus to find synonyms for commonly used words.", "Proofread for errors in word form after writing."],
-  },
-  grammaticalRangeAndAccuracy: {
-    bandScore: 7.0,
-    justification: "A variety of complex structures are used with reasonable accuracy. While there are some grammatical errors, they do not impede communication.",
-    strengths: ["Uses a mix of simple and complex sentence structures.", "Good control of verb tenses."],
-    weaknesses: ["Some errors with articles (a/an/the).", "Occasional mistakes in subject-verb agreement."],
-    improvements: ["Review the rules for definite and indefinite articles.", "Pay close attention to subject-verb agreement in complex sentences."],
-  },
-  overallStrengths: ["Clear structure and logical flow.", "Strong vocabulary range.", "Good use of complex sentences."],
-  overallWeaknesses: ["Minor but noticeable grammatical errors.", "Supporting details could be more developed."],
-  keyRecommendations: ["Focus on proofreading for grammatical accuracy, especially articles and subject-verb agreement.", "Practice expanding on main ideas with more detailed examples.", "Strengthen your conclusions to leave a lasting impression."],
-  transcribedAnswer: "This is a placeholder for the transcribed answer. The actual answer provided by the user will be shown here. This allows us to simulate how the final report will look, including the formatting of the text and the word count calculation.",
-  question: "This is a placeholder for the question. The actual question provided by the user will appear here."
-};
-
 export async function assessWriting(data: FormValues): Promise<ActionResult> {
   try {
     const validation = formSchema.safeParse(data);
@@ -67,28 +31,93 @@ export async function assessWriting(data: FormValues): Promise<ActionResult> {
 
     let { question, answer } = validation.data;
 
+    // Transcribe images if they exist
     if (validation.data.questionImages && validation.data.questionImages.length > 0) {
-        question = "Placeholder for transcribed question from images.";
+      const transcriptionResult = await transcribeImageToText({ photoDataUris: validation.data.questionImages });
+      question = transcriptionResult.transcription;
     }
     
     if (validation.data.answerImages && validation.data.answerImages.length > 0) {
-        answer = "Placeholder for transcribed answer from images. This demonstrates that the image upload was successful and would be processed by the backend AI in a real scenario. The text is long enough to pass the minimum character validation.";
+      const transcriptionResult = await transcribeImageToText({ photoDataUris: validation.data.answerImages });
+      answer = transcriptionResult.transcription;
     }
 
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const resultData = {
-      ...MOCK_EVALUATION_DATA,
-      question: question,
-      transcribedAnswer: answer,
+    // Call the evaluation flow
+    const evaluationResult = await evaluateIELTSWriting({
       taskType: validation.data.taskType,
+      question,
+      answer,
+      candidateName: validation.data.candidateName,
+      candidateEmail: validation.data.candidateEmail,
+    });
+
+    const resultData: AssessmentResult = {
+      candidate: {
+        name: validation.data.candidateName,
+        email: validation.data.candidateEmail,
+      },
+      task: {
+        type: validation.data.taskType,
+        question: question,
+        word_count: answer.split(/\s+/).filter(Boolean).length,
+      },
+      assessment: {
+        task_achievement_or_response: {
+          band: evaluationResult.taskAchievementResponse.bandScore,
+          justification: evaluationResult.taskAchievementResponse.justification,
+          examples: {
+            strengths: evaluationResult.taskAchievementResponse.strengths,
+            weaknesses: evaluationResult.taskAchievementResponse.weaknesses,
+          },
+          improvements: evaluationResult.taskAchievementResponse.improvements,
+        },
+        coherence_and_cohesion: {
+          band: evaluationResult.coherenceAndCohesion.bandScore,
+          justification: evaluationResult.coherenceAndCohesion.justification,
+          examples: {
+            strengths: evaluationResult.coherenceAndCohesion.strengths,
+            weaknesses: evaluationResult.coherenceAndCohesion.weaknesses,
+          },
+          improvements: evaluationResult.coherenceAndCohesion.improvements,
+        },
+        lexical_resource: {
+          band: evaluationResult.lexicalResource.bandScore,
+          justification: evaluationResult.lexicalResource.justification,
+          examples: {
+            strengths: evaluationResult.lexicalResource.strengths,
+            weaknesses: evaluationResult.lexicalResource.weaknesses,
+          },
+          improvements: evaluationResult.lexicalResource.improvements,
+        },
+        grammatical_range_and_accuracy: {
+          band: evaluationResult.grammaticalRangeAndAccuracy.bandScore,
+          justification: evaluationResult.grammaticalRangeAndAccuracy.justification,
+          examples: {
+            strengths: evaluationResult.grammaticalRangeAndAccuracy.strengths,
+            weaknesses: evaluationResult.grammaticalRangeAndAccuracy.weaknesses,
+          },
+          improvements: evaluationResult.grammaticalRangeAndAccuracy.improvements,
+        },
+        overall_band_score: evaluationResult.overallBandScore,
+      },
+      feedback: {
+        overall_strengths: evaluationResult.overallStrengths,
+        overall_weaknesses: evaluationResult.overallWeaknesses,
+        key_recommendations: evaluationResult.keyRecommendations,
+        summary: `This response exemplifies a solid performance, achieving an overall Band ${evaluationResult.overallBandScore}, which corresponds to CEFR level ${evaluationResult.cefrLevel}. Continue to build on the strengths and address the weaknesses to further improve your score.`
+      },
+      transcribedAnswer: answer,
+      cefrLevel: evaluationResult.cefrLevel
     };
 
     return { success: true, data: resultData };
 
   } catch (error) {
     console.error('An error occurred during assessment:', error);
-    return { success: false, error: 'An unexpected error occurred on the server. Please try again.' };
+    let errorMessage = 'An unexpected error occurred on the server. Please try again.';
+    if (error instanceof Error) {
+        errorMessage = error.message;
+    }
+    return { success: false, error: errorMessage };
   }
 }

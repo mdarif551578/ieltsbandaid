@@ -11,6 +11,7 @@ import CriteriaAccordion from '@/components/results/criteria-accordion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function ResultsPage() {
   const { state } = useAssessment();
@@ -19,17 +20,20 @@ export default function ResultsPage() {
   useEffect(() => {
     // Redirect if there's no result and it's not loading.
     const timer = setTimeout(() => {
-      if (!state.isLoading && !state.result) {
+      if (!state.isLoading && !state.result && !state.error) {
         console.log("Redirecting to /assess");
         router.replace('/assess');
       }
-    }, 100); // Small delay to allow initial state to be set
+    }, 500); // Increased delay to allow for state hydration
 
     return () => clearTimeout(timer);
-  }, [state.isLoading, state.result, router]);
+  }, [state.isLoading, state.result, state.error, router]);
 
+  const handlePrint = () => {
+    window.print();
+  };
 
-  if (state.isLoading || !state.result) {
+  if (state.isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
@@ -39,32 +43,41 @@ export default function ResultsPage() {
     );
   }
 
+  if (state.error) {
+    return (
+        <div className="container mx-auto max-w-2xl py-12">
+            <Alert variant="destructive">
+                <AlertTitle>Assessment Failed</AlertTitle>
+                <AlertDescription>
+                   <p className="mb-4">{state.error}</p>
+                   <Button asChild variant="destructive">
+                        <Link href="/assess">Try Again</Link>
+                   </Button>
+                </AlertDescription>
+            </Alert>
+        </div>
+    )
+  }
+
+  if (!state.result) {
+    return null; // Or a minimal loading state/skeleton
+  }
+
   const {
-    overallBandScore,
-    cefrLevel,
-    taskAchievementResponse,
-    coherenceAndCohesion,
-    lexicalResource,
-    grammaticalRangeAndAccuracy,
-    overallStrengths,
-    overallWeaknesses,
-    keyRecommendations,
+    assessment,
+    feedback,
+    task,
     transcribedAnswer,
-    question,
-    taskType
+    cefrLevel,
   } = state.result;
 
   const criteria = [
-    { title: 'Task Achievement / Response', data: taskAchievementResponse },
-    { title: 'Coherence and Cohesion', data: coherenceAndCohesion },
-    { title: 'Lexical Resource', data: lexicalResource },
-    { title: 'Grammatical Range and Accuracy', data: grammaticalRangeAndAccuracy },
+    { title: 'Task Achievement / Response', data: assessment.task_achievement_or_response },
+    { title: 'Coherence and Cohesion', data: assessment.coherence_and_cohesion },
+    { title: 'Lexical Resource', data: assessment.lexical_resource },
+    { title: 'Grammatical Range and Accuracy', data: assessment.grammatical_range_and_accuracy },
   ];
   
-  const handlePrint = () => {
-    window.print();
-  };
-
   return (
     <div className="bg-muted/30 print:bg-white">
       <div className="container mx-auto max-w-5xl py-8 md:py-12 print:py-4">
@@ -78,7 +91,7 @@ export default function ResultsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
-                <ScoreOverview score={overallBandScore} cefr={cefrLevel} />
+                <ScoreOverview score={assessment.overall_band_score} cefr={cefrLevel} summary={feedback.summary}/>
                 <CriteriaAccordion criteria={criteria} />
                 
                 <Card>
@@ -89,21 +102,21 @@ export default function ResultsPage() {
                         <div>
                             <h3 className="text-lg font-semibold text-green-600">Overall Strengths</h3>
                             <ul className="mt-2 list-disc list-inside space-y-1 text-muted-foreground">
-                                {overallStrengths.map((item, i) => <li key={i}>{item}</li>)}
+                                {feedback.overall_strengths.map((item, i) => <li key={i}>{item}</li>)}
                             </ul>
                         </div>
                         <Separator />
                          <div>
                             <h3 className="text-lg font-semibold text-red-600">Overall Weaknesses</h3>
                             <ul className="mt-2 list-disc list-inside space-y-1 text-muted-foreground">
-                                {overallWeaknesses.map((item, i) => <li key={i}>{item}</li>)}
+                                {feedback.overall_weaknesses.map((item, i) => <li key={i}>{item}</li>)}
                             </ul>
                         </div>
                         <Separator />
                         <div>
                             <h3 className="text-lg font-semibold text-primary">Key Recommendations</h3>
                             <ul className="mt-2 list-disc list-inside space-y-1 text-muted-foreground">
-                                {keyRecommendations.map((item, i) => <li key={i}>{item}</li>)}
+                                {feedback.key_recommendations.map((item, i) => <li key={i}>{item}</li>)}
                             </ul>
                         </div>
                     </CardContent>
@@ -118,11 +131,11 @@ export default function ResultsPage() {
                     <CardContent className="space-y-4">
                         <div>
                            <h4 className="font-semibold text-sm mb-1">Task Type</h4>
-                           <p className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-md">{taskType}</p>
+                           <p className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-md">{task.type}</p>
                         </div>
                         <div>
                            <h4 className="font-semibold text-sm mb-1">Word Count</h4>
-                           <Badge variant="secondary">{transcribedAnswer.split(/\s+/).filter(Boolean).length} words</Badge>
+                           <Badge variant="secondary">{task.word_count} words</Badge>
                         </div>
                     </CardContent>
                 </Card>
@@ -133,7 +146,7 @@ export default function ResultsPage() {
                     <CardContent className="space-y-4 max-h-96 overflow-y-auto">
                         <div className="prose prose-sm max-w-none text-muted-foreground p-3 bg-muted/50 rounded-md">
                            <h4 className="font-semibold !text-foreground !mb-2">Question:</h4>
-                           <p>{question}</p>
+                           <p>{task.question}</p>
                            <h4 className="font-semibold !text-foreground !mt-4 !mb-2">Your Answer:</h4>
                            <p>{transcribedAnswer}</p>
                         </div>
