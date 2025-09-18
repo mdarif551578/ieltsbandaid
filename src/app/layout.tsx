@@ -11,12 +11,12 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-body' });
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-headline' });
 
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ielts-bandaid.web.app';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || '';
 const title = 'IELTS BandAid - AI IELTS Writing Assessor';
 const description = 'Boost Your IELTS Writing Band Score with AI Feedback. Get instant, expert-level analysis based on official criteria.';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: siteUrl ? new URL(siteUrl) : undefined,
   title: title,
   description: description,
   openGraph: {
