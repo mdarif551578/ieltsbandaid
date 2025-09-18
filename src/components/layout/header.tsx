@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { Menu, GraduationCap } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -44,7 +44,7 @@ export default function Header() {
         ))}
         </nav>
         <div className="flex items-center justify-end space-x-4 ml-auto">
-          <Button asChild className="hidden sm:inline-flex">
+          <Button asChild>
             <Link href="/assess">Start Assessment</Link>
           </Button>
           <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
@@ -55,6 +55,7 @@ export default function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left">
+                <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
               <Link href="/" className="mr-6 flex items-center space-x-2 mb-6" onClick={() => setSheetOpen(false)}>
                 <GraduationCap className="h-6 w-6 text-primary" />
                 <span className="font-bold font-headline">IELTS BandAid</span>
