@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { Separator } from '@/components/ui/separator';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -24,25 +25,23 @@ export default function Header() {
       <div className="container flex h-16 items-center">
         <Link href="/" className="mr-6 flex items-center space-x-2">
           <GraduationCap className="h-6 w-6 text-primary" />
-          <span className="font-bold font-headline text-lg hidden sm:inline-block">IELTS BandAid</span>
+          <span className="font-bold font-headline text-lg">IELTS BandAid</span>
         </Link>
-        <div className="flex-1 md:flex-none">
-            <nav className="hidden items-center space-x-6 text-sm font-medium md:flex">
-            {navLinks.map((link) => (
-                <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                    'transition-colors hover:text-primary',
-                    pathname === link.href ? 'text-foreground font-semibold' : 'text-muted-foreground'
-                )}
-                >
-                {link.label}
-                </Link>
-            ))}
-            </nav>
-        </div>
-        <div className="flex flex-1 items-center justify-end space-x-4">
+        <nav className="hidden items-center space-x-6 text-sm font-medium md:flex flex-1">
+        {navLinks.map((link) => (
+            <Link
+            key={link.href}
+            href={link.href}
+            className={cn(
+                'transition-colors hover:text-primary',
+                pathname === link.href ? 'text-foreground font-semibold' : 'text-muted-foreground'
+            )}
+            >
+            {link.label}
+            </Link>
+        ))}
+        </nav>
+        <div className="flex items-center justify-end space-x-4 ml-auto">
           <Button asChild>
             <Link href="/assess">Start Assessment</Link>
           </Button>
@@ -72,6 +71,10 @@ export default function Header() {
                     {link.label}
                   </Link>
                 ))}
+                 <Separator className="my-2" />
+                 <Button asChild onClick={() => setSheetOpen(false)}>
+                    <Link href="/assess">Start Assessment</Link>
+                </Button>
               </div>
             </SheetContent>
           </Sheet>
