@@ -22,14 +22,14 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center">
-        <div className="flex-1 md:flex-none">
+      <div className="container flex h-16 items-center justify-between">
+        <div className="flex items-center">
             <Link href="/" className="mr-6 flex items-center space-x-2">
               <GraduationCap className="h-6 w-6 text-primary" />
-              <span className="font-bold font-headline text-lg">IELTS BandAid</span>
+              <span className="font-bold font-headline text-lg whitespace-nowrap">IELTS BandAid</span>
             </Link>
         </div>
-        <nav className="hidden items-center space-x-6 text-sm font-medium md:flex flex-1">
+        <nav className="hidden items-center space-x-6 text-sm font-medium md:flex">
         {navLinks.map((link) => (
             <Link
             key={link.href}
@@ -43,8 +43,8 @@ export default function Header() {
             </Link>
         ))}
         </nav>
-        <div className="flex items-center justify-end space-x-4 ml-auto">
-          <Button asChild>
+        <div className="flex items-center space-x-2 md:space-x-4">
+          <Button asChild className="hidden md:inline-flex">
             <Link href="/assess">Start Assessment</Link>
           </Button>
           <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
