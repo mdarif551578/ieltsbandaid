@@ -70,6 +70,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
           strategy="lazyOnload"
         />
+<meta name="google-site-verification" content="yFGdP65i916oCwom1sHrhTkBfRrIvS040hjnfiFm_6Y" />
       </head>
       <body className={cn('min-h-screen bg-background font-body antialiased', inter.variable, spaceGrotesk.variable)}>
         <Providers>
