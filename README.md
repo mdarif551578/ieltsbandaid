@@ -96,6 +96,15 @@ If you have a suggestion that would make this better, please fork the repo and c
 4.  Push to the Branch (`git push origin feature/AmazingFeature`)
 5.  Open a Pull Request
 
+## 📄 Sitemap & Robots
+
+The project now includes SEO files:
+
+- **Sitemap**: `public/sitemap.xml` – lists primary site URLs and is served at `https://ieltsbandaid.pages.dev/sitemap.xml`.
+- **Robots.txt**: `public/robots.txt` – allows all agents and points to the sitemap.
+
+When new pages or routes are added, update `public/sitemap.xml` accordingly to keep search engines informed.
+
 ---
 
 ## 📄 License
